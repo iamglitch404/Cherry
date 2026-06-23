@@ -1,0 +1,67 @@
+{
+	"WhatsaapAccount": {
+		"number": "9779863479066",
+		"printQR": false,
+		"sessionFolder": "session",
+		"proxy": null,
+		"userAgent": "Mozilla/5.0 (Linux; Android 12; M2102J20SG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Mobile Safari/537.36",
+		"notes": "time the system automatically retrieves new session cookies"
+	},
+	"language": "en",
+	"timeZone": "Asia/Kathmandu",
+	"prefix": "+",
+	"adminOnly": {
+		"enable": false,
+		"ignoreCommand": []
+	},
+	"adminBot": [
+		"251346368389217"
+	],
+	"whiteListMode": {
+		"enable": false,
+		"whiteListIds": [],
+		"notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot (Inbox/DMs)"
+	},
+	"whiteListGroup": {
+		"enable": true,
+		"whiteListThreadIds": [
+			"120363428947271869@g.us"
+		],
+		"notes": "if you enable this feature, only the thread in the whiteListThreadIds list can use the bot"
+	},
+	"whiteListChannel": {
+		"enable": false,
+		"whiteListChannelIds": [],
+		"notes": "DISABLED — bot will not respond in channels/communities."
+	},
+	"DATABASE": {
+		"type": "sqlite",
+		"uri": "",
+		"notes": "type selects 'sqlite' or 'mongodb'. If you choose mongodb, enter your mongodb uri string."
+	},
+	"dashBoard": {
+		"enable": true,
+		"expireVerifyCode": 300000,
+		"port": 3001
+	},
+	"credentials": {
+		"gmailAccount": {
+			"email": "",
+			"clientId": "",
+			"clientSecret": "",
+			"refreshToken": "",
+			"apiKey": ""
+		}
+	},
+	"autoRestart": {
+		"time": 0,
+		"notes": "you can set time is interval with milisecond or cron time, example: 1000, 10000, 60000, 3600000, 86400000, 0 0 * * *,... If you set time is 0 or false or null, the bot will not auto restart"
+	},
+	"autoUptime": {
+		"enable": true,
+		"timeInterval": 180,
+		"url": "",
+		"port": 3000,
+		"notes": "the value of timeInterval is seconds"
+	}
+}

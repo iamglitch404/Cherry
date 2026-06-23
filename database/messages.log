@@ -1,0 +1,904 @@
+
+--- [23/06/26 10:47:34] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "A5455C6BB9B708E39985C08B6D2C2DB7",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782190956,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "Hm",
+    "senderKeyDistributionMessage": {
+      "groupId": "120363428719037423@g.us",
+      "axolotlSenderKeyDistributionMessage": "MwjAt8YSEEQaIPUERFEvtDPxPJm/EoBdMnQVtB7Pe901pz6QstBUAbxyIiEFzd0XImeCxXVhmFUyHM9cksbI55cgj8RQL1/sBFk1Zhw="
+    },
+    "messageContextInfo": {
+      "messageSecret": "DqfPn8nokpX4GsIKyZ/7GCRfbEyvJT/0FCt4Pf5qfmU=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": true
+      }
+    }
+  },
+  "verifiedBizName": "Yugant xettri"
+}
+
+--- [23/06/26 10:48:50] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "A5A27DAEED8C3F1D1B70F00227F0EFD2",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191032,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "extendedTextMessage": {
+      "text": "Bot aaja publish garxu hijo garxu vaneko thiye",
+      "previewType": "NONE",
+      "contextInfo": {
+        "stanzaId": "3EB0CC4895609D116BCB03",
+        "participant": "115942927429824@lid",
+        "quotedMessage": {
+          "conversation": "suta yr"
+        },
+        "quotedType": "EXPLICIT"
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "VmdN905PqNetD4gn8Xi/6aSAXzFtHdpAMzU2HxtN/i8=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": true
+      },
+      "threadId": [
+        {
+          "threadType": "VIEW_REPLIES",
+          "threadKey": {
+            "remoteJid": "120363428719037423@g.us",
+            "fromMe": false,
+            "id": "3EB0CC4895609D116BCB03",
+            "participant": "115942927429824@lid"
+          }
+        }
+      ]
+    }
+  }
+}
+
+--- [23/06/26 10:49:09] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "A5F3A244F88E5BC6DE3AD86F92B30524",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191050,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "Prefix",
+    "messageContextInfo": {
+      "messageSecret": "ECOAmyH/kri4Bw1ocQsfdIl5JrF3tC7bbEy/R/sHVNw=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": true
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:02:46] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": true,
+    "id": "3EB0D894F8CE48C6EE6A22",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191868,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "sidhaing",
+    "messageContextInfo": {
+      "messageSecret": "gN74Z5BxQv/36jxmLRAiH827Sz7Ta7jOWXnShFQijgc=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "UNKNOWN_GROUP",
+        "limitSharingSettingTimestamp": "1781678231052",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:03:29] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB06720EC022ED4C822FD",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191911,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "extendedTextMessage": {
+      "text": "why",
+      "contextInfo": {
+        "stanzaId": "AC73D473669289C9367776CBCB145689",
+        "participant": "203504727629910@lid",
+        "quotedMessage": {
+          "conversation": "0"
+        }
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "KMgvgjbcQPlq4hGIzwHP+VKTZgUNZg7JfSb1BfFlK0E=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:03:32] From: 137030931607587 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "ACE8BA972280105CB481464CA57DBD66",
+    "participant": "137030931607587@lid",
+    "participantAlt": "9779866291003@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191914,
+  "pushName": "Saugat Shahi Thakuri",
+  "broadcast": false,
+  "message": {
+    "conversation": "Khai ta rep",
+    "messageContextInfo": {
+      "messageSecret": "i/LAyO5+tU6UH5sjFFhX2KqtN9hSJ0fYHPe6kSmccZ0="
+    }
+  }
+}
+
+--- [23/06/26 11:03:34] From: 137030931607587 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "AC74FE0E75F0C257C2CE83E6074D7AC5",
+    "participant": "137030931607587@lid",
+    "participantAlt": "9779866291003@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191916,
+  "pushName": "Saugat Shahi Thakuri",
+  "broadcast": false,
+  "message": {
+    "conversation": "Repo",
+    "messageContextInfo": {
+      "messageSecret": "0bKR1PwqWsZjNmt6WGiyZDJ5iaXplvMMI3KK44eQE8k="
+    }
+  }
+}
+
+--- [23/06/26 11:03:49] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": true,
+    "id": "3EB08CBB1CCEA7AA5EBE2F",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191931,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "hmmm banairaxu so sidhaing",
+    "messageContextInfo": {
+      "messageSecret": "VCJY5+DTRAFjp7CpDr0NZqkrBB1mgmC+xu1W89YujhY=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "UNKNOWN_GROUP",
+        "limitSharingSettingTimestamp": "1781678231052",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:04:12] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": true,
+    "id": "3EB02B496C900A870078B5",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782191954,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "extendedTextMessage": {
+      "text": "bot name @203504727629910",
+      "contextInfo": {
+        "mentionedJid": [
+          "203504727629910@lid"
+        ],
+        "disappearingMode": {
+          "initiator": "CHANGED_IN_CHAT",
+          "trigger": "CHAT_SETTING"
+        }
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "kN53p0NcuqA0swFwzYvITz8yiJflZhXgRS4jG2Orm+8=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "UNKNOWN_GROUP",
+        "limitSharingSettingTimestamp": "1781678231052",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:05:05] From: 137030931607587 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "AC0462BE74F22F810123778695BACBA2",
+    "participant": "137030931607587@lid",
+    "participantAlt": "9779866291003@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192007,
+  "pushName": "Saugat Shahi Thakuri",
+  "broadcast": false,
+  "message": {
+    "conversation": "La thik xa",
+    "messageContextInfo": {
+      "messageSecret": "mrH4rrjJ+v2y+SnSZvqRudQ40Yet58n6au/ZwQk/9o4="
+    }
+  }
+}
+
+--- [23/06/26 11:05:34] From: 203504727629910 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "AC8ABDD6F1ED36D60358B55B11305948",
+    "participant": "203504727629910@lid",
+    "participantAlt": "9779749319342@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192036,
+  "pushName": "Cherry",
+  "broadcast": false,
+  "message": {
+    "senderKeyDistributionMessage": {
+      "groupId": "120363428947271869@g.us",
+      "axolotlSenderKeyDistributionMessage": "MwjD1u+8BRAAGiBma+w/nKIalBtIGrArQuVo7lwpkvxGBSe3bEx67EN55CIhBS226csKRwYsA0aymcFiP4yeu99mn4yy/J6WBSkcrI8G"
+    },
+    "extendedTextMessage": {
+      "text": "perfect",
+      "previewType": "NONE",
+      "contextInfo": {
+        "stanzaId": "3EB08237E5EC3FFF1786F3",
+        "participant": "251346368389217@lid",
+        "quotedMessage": {
+          "imageMessage": {
+            "url": "https://mmg.whatsapp.net/v/t62.7118-24/560328194_2434675713622373_4951205413964451753_n.enc?ccb=11-4&oh=01_Q5Aa4wHit11659yJb8JR7IGqB7-yuobC9iMLQrKcGeYHB06elQ&oe=6A617F44&_nc_sid=5e03e0&mms3=true",
+            "mimetype": "image/jpeg",
+            "fileSha256": "cJa6f8mAE+D53UuaiE5/9wX9DVV1fGK+KTF6xqYQjSI=",
+            "fileLength": "29523",
+            "height": 180,
+            "width": 1223,
+            "mediaKey": "zLi7rLQ0wkJUlXYmUkgl4BfebtX9lw2OiLaTTFU+WoI=",
+            "fileEncSha256": "bdxLgqwTJVDZgApb3EWA+3lJ0v39i4+YoDdgdewuc8w=",
+            "directPath": "/v/t62.7118-24/560328194_2434675713622373_4951205413964451753_n.enc?ccb=11-4&oh=01_Q5Aa4wHit11659yJb8JR7IGqB7-yuobC9iMLQrKcGeYHB06elQ&oe=6A617F44&_nc_sid=5e03e0",
+            "mediaKeyTimestamp": "1782191947",
+            "jpegThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAOAGQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAUHAQYICf/EACYQAAICAQQCAQUBAQAAAAAAAAECAwQFAAYHERIhEwgUIjFBMvD/xAAZAQEAAwEBAAAAAAAAAAAAAAAAAwUGBAf/xAAmEQABAwMCBQUAAAAAAAAAAAABAhEhAAMSBAUTIjFBYQYjQmKB/9oADAMBAAIRAxEAPwDzq0000pTVu7c2/tLD8Bjk/K7RxObvPu+XAOt83vUX2Uc8ZT7e3AF6Il78gxbzXor49NUWtv23ypvHbO2pNmUbmNlwcl1smaV/B0chGLZiEYlAsxP4nxUL2D6HfQ9nvq0i7aFniB3DCAZ7Qams3EW8isPBaHmunNjfTpxFmNtUs5eo4e/LZxezmlpVsxZNupYtuhtvYjWQfGJ0mQoP10pKhf2YDA8QbAv47ea5HB8ZJJhYcZYxWbTO5IYWeKxNLG7SS/es3owvGB2pEg6/IEHVM4jnrkvEQpBR3OaQSljqReLHwStImPLvRDeY6HgzKpI67UdsHIPlF5TlveuSwmW2ybeKgxebaJr8dLA0KTWvik+SMyNBCrEhvf8Ar+kfonu9O5bchCfYllfFMk5AT1gt5DRHXJb1tm465TaO7w0kpnNQIAUkqYAMSQCGJYvLdR01yF9P3EGA2zZvYbbePxjrR3PMYs7kbceWmepHM0D0IVmEcsSMgft1byg+NmJZmJqbd2zON8NsIcyVdvUo8VvJFx23cA+Tn+4oTR1p47lr2xaQR3IoWQs7oY5SrorOnhrW5udORuTMrFb3TuNPuqta9SxcUGNgESLfAgsRMfTKhgZwHPyMCiAAFi41DM7tzWX2pgdpZHLyT0tty3VoUzViRKyTukjsJV/OQu4YkOPxCr4k+RC57Xrt3rr2Rik/nbxVLs3p/fNPbtjW6sqOXPzrPKStWKSWcuLYyghOaR9oDTTTUNeg01lmJCgsx8R10f57Pof9/dY00pTTTTSlf//Z",
+            "contextInfo": {
+              "pairedMediaType": "NOT_PAIRED_MEDIA"
+            }
+          }
+        },
+        "quotedType": "EXPLICIT"
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "AIsgFKDcasssZE8p+tIry/TFEhh/DLUb7iaFI79p0Q0=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781089112828",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:05:34] From: 203504727629910 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "ACB8F06C74A0A6892C1070836FCCE152",
+    "participant": "203504727629910@lid",
+    "participantAlt": "9779749319342@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192036,
+  "pushName": "Cherry",
+  "broadcast": false,
+  "message": {
+    "conversation": "🙂‍↕️🙂‍↕️",
+    "messageContextInfo": {
+      "messageSecret": "lE/l8K8ThlYFeFmRhGR2GToUaY1bhX1zgj/2sLKkywQ=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781089112828",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:06:00] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": true,
+    "id": "3EB00CF1D505D133B3409E",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192062,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "asti kaley suggest gareko thiyo",
+    "messageContextInfo": {
+      "messageSecret": "0aDlzPTOSYX5yr9wzHp4lGBfO53dG/fgBiNQWgEIl5k=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "UNKNOWN_GROUP",
+        "limitSharingSettingTimestamp": "1781678231052",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:06:15] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB00FCC70B40C77A8EE3B",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192076,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "color xaina rey",
+    "messageContextInfo": {
+      "messageSecret": "4TpZbnwRb/cIJV18FcgawSnqGVZyyG4I7TLq8K3RvBo=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:06:15] From: 203504727629910 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": false,
+    "id": "AC23E565AE5945C90601ECD473DBD3EE",
+    "participant": "203504727629910@lid",
+    "participantAlt": "9779749319342@s.whatsapp.net",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192077,
+  "pushName": "Cherry",
+  "broadcast": false,
+  "message": {
+    "extendedTextMessage": {
+      "text": "yos perfect vaxa",
+      "previewType": "NONE",
+      "contextInfo": {
+        "stanzaId": "3EB00CF1D505D133B3409E",
+        "participant": "251346368389217@lid",
+        "quotedMessage": {
+          "conversation": "asti kaley suggest gareko thiyo"
+        },
+        "quotedType": "EXPLICIT"
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "u/l8Ikxb9CUUACpJ7M9C2Y0Z1wnU/sON5pmgdGYTXW0=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781089112828",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:06:19] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB01F48265AD244EC10A6",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192081,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "formatting xaina rey",
+    "messageContextInfo": {
+      "messageSecret": "NVWXRZoRQLGM69WBj44FY9gDrDw7dubk97LTSIlptdU=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:07:00] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB04CF40A8CC29109505F",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192121,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "skills issue",
+    "messageContextInfo": {
+      "messageSecret": "P0oza/LXEIQCiGE7grodF6lx0AsOrmAd+2leinTikq4=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:07:02] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0B6670F9A0ADEA0DE72",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192124,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "color xa",
+    "messageContextInfo": {
+      "messageSecret": "Gw0byPiCTOkMIQJQSK0t6bpO4S+OmskUITOXLqxRY8M=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:07:32] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0BE28BE920302B42567",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192154,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "imageMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7118-24/562027832_934064956319652_3537991628384883620_n.enc?ccb=11-4&oh=01_Q5Aa4wHXaHZzeWl4ZoRyYQ5fpUccAv_WOcrExsbYN4P6Q0ylTw&oe=6A61878C&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "image/jpeg",
+      "caption": "const c = (n) => (t) => `\\x1b[${n}m${t}\\x1b[0m`; const [red, grn, cya, gry] = [31, 32, 36, 90].map(c);",
+      "fileSha256": "28YcExsqt7qRA+RlVX4P0A2xou7J2qH3Ra5mLd8dyjQ=",
+      "fileLength": "12730",
+      "height": 60,
+      "width": 395,
+      "mediaKey": "NuMocVmVCCyZxsfc3YyygfDkLKn4uh+B1QuzMxMNBm8=",
+      "fileEncSha256": "4iyDfRlq3MRbdMpl/XNwsLa0x/zu2BviAJSMtzz3B6I=",
+      "directPath": "/v/t62.7118-24/562027832_934064956319652_3537991628384883620_n.enc?ccb=11-4&oh=01_Q5Aa4wHXaHZzeWl4ZoRyYQ5fpUccAv_WOcrExsbYN4P6Q0ylTw&oe=6A61878C&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1782192151",
+      "jpegThumbnail": "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",
+      "viewOnce": false
+    },
+    "messageContextInfo": {
+      "messageSecret": "W8GhzcURH5eQC8JUGFYYQmtZQC/jS0RmmO8C0GbQUMw="
+    }
+  }
+}
+
+--- [23/06/26 11:08:14] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428947271869@g.us",
+    "fromMe": true,
+    "id": "3EB086F9FBFEDD2BC95519",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192195,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "imageMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7118-24/562027832_934064956319652_3537991628384883620_n.enc?ccb=11-4&oh=01_Q5Aa4wHXaHZzeWl4ZoRyYQ5fpUccAv_WOcrExsbYN4P6Q0ylTw&oe=6A61878C&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "image/jpeg",
+      "caption": "const c = (n) => (t) => `\\x1b[${n}m${t}\\x1b[0m`; const [red, grn, cya, gry] = [31, 32, 36, 90].map(c);",
+      "fileSha256": "28YcExsqt7qRA+RlVX4P0A2xou7J2qH3Ra5mLd8dyjQ=",
+      "fileLength": "12730",
+      "height": 60,
+      "width": 395,
+      "mediaKey": "NuMocVmVCCyZxsfc3YyygfDkLKn4uh+B1QuzMxMNBm8=",
+      "fileEncSha256": "4iyDfRlq3MRbdMpl/XNwsLa0x/zu2BviAJSMtzz3B6I=",
+      "directPath": "/v/t62.7118-24/562027832_934064956319652_3537991628384883620_n.enc?ccb=11-4&oh=01_Q5Aa4wHXaHZzeWl4ZoRyYQ5fpUccAv_WOcrExsbYN4P6Q0ylTw&oe=6A61878C&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1782192151",
+      "jpegThumbnail": "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",
+      "contextInfo": {
+        "stanzaId": "AC23E565AE5945C90601ECD473DBD3EE",
+        "participant": "203504727629910@lid",
+        "quotedMessage": {
+          "conversation": "yos perfect vaxa"
+        },
+        "disappearingMode": {
+          "initiator": "CHANGED_IN_CHAT"
+        }
+      },
+      "viewOnce": false
+    },
+    "messageContextInfo": {
+      "messageSecret": "zRyXXxdUDuuoDk0+U1GDx+e7LKVysKjoJtx1RyOyzv4="
+    }
+  }
+}
+
+--- [23/06/26 11:09:23] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0784356239EAACA4AC4",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192265,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "cring",
+    "messageContextInfo": {
+      "messageSecret": "HzIqx2Tc9vaXlKChjBKAZ9Mgkju1/5/4unEzoLwqUUo=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:09:30] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0D9AC6FDE7D7A22D2A8",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192271,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "extendedTextMessage": {
+      "text": "ho",
+      "contextInfo": {
+        "stanzaId": "AC6AB60D500AA40868DB602E89D9196D",
+        "participant": "203504727629910@lid",
+        "quotedMessage": {
+          "conversation": "tyo color haen"
+        }
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "umzBlJaUOeNCEtyJS5zvNHfOpd+s1xP8tc118xUQbuc=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:09:43] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0EF8DA606369A52A4E4",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192284,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "rating deu ramro snga padhera",
+    "messageContextInfo": {
+      "messageSecret": "DNee3kQddPNaGsbxOSfD1jxEzxIrQZ35/QIfeAxbC5g=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:09:44] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB07B98A6D66B926468A9",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192286,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "code",
+    "messageContextInfo": {
+      "messageSecret": "w/sGm4ENTVS6YDUwAgedecIj/gXg19m9mmMv32Wqntw=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:10:48] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB03A971A782C1E2737C3",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192349,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "chasmiss hau",
+    "messageContextInfo": {
+      "messageSecret": "5gmA9Z05fkaYoj95SbwtMRV21igbceWgEe9zlTdtC/w=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:11:12] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0D71620FF01D5380244",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192373,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "ma matra rexu chasma nalagauni",
+    "messageContextInfo": {
+      "messageSecret": "7W/cgHEsoawdFtS5lloiRi0OEsS8XViD2t2FKPSms/k=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 11:12:42] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "3EB0557C50B21BBC3D8A9F",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782192463,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "extendedTextMessage": {
+      "text": "ohhh",
+      "contextInfo": {
+        "stanzaId": "AC8460A0BBCB85F085381C5F56A62F4D",
+        "participant": "203504727629910@lid",
+        "quotedMessage": {
+          "conversation": "timro aakha testo kharab na hola malae ta dur ko dekhdaina 🫡🫡"
+        }
+      },
+      "inviteLinkGroupTypeV2": "DEFAULT"
+    },
+    "messageContextInfo": {
+      "messageSecret": "jp9OP5VukEs1exkYo1XEK/+beGwvwjSA6TNQanpVgqk=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": false
+      }
+    }
+  }
+}
+
+--- [23/06/26 12:04:03] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "A5D8AFC8A660A7C0234F4C7F926BEE72",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782195545,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "🤣",
+    "messageContextInfo": {
+      "messageSecret": "M0uqkhCAACzK5VTioZhnisPHoHgKETL8ft7tVFFQd4U=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": true
+      }
+    }
+  }
+}
+
+--- [23/06/26 12:04:06] From: 251346368389217 ---
+{
+  "key": {
+    "remoteJid": "120363428719037423@g.us",
+    "fromMe": true,
+    "id": "A507A360D3AE74EBCA15827E39A1A4BD",
+    "participant": "251346368389217@lid",
+    "addressingMode": "lid"
+  },
+  "messageTimestamp": 1782195548,
+  "pushName": "Yugant xettri",
+  "broadcast": false,
+  "status": 2,
+  "message": {
+    "conversation": "Mero gaian",
+    "messageContextInfo": {
+      "messageSecret": "JT1FSKRxQL80qNcYCJXCRSwSfOg3rYJPgrq4EV4KIKo=",
+      "limitSharingV2": {
+        "sharingLimited": true,
+        "trigger": "CHAT_SETTING",
+        "limitSharingSettingTimestamp": "1781889438008",
+        "initiatedByMe": true
+      }
+    }
+  }
+}

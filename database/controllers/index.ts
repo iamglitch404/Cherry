@@ -1,0 +1,2 @@
+// @ts-nocheck
+"use strict";import o from"./users.ts";import e from"./threads.ts";import n from"./global.ts";import a from"./communities.ts";import l from"./channels.ts";import i from"./userDashBoard.ts";export default function t(r){return{Users:o(r.userModel),Threads:e(r.threadModel),Global:n(r.globalModel),Communities:r.communitiesModel?a(r.communitiesModel):null,Channels:r.channelsModel?l(r.channelsModel):null,UserDashBoard:r.dashBoardModel?i(r.dashBoardModel):null}}

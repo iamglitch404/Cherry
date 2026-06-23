@@ -1,0 +1,92 @@
+# Config Errors
+config.readError=Error reading config.json: %1
+
+# Pairing Settings
+pairing.title=WHATSAPP BOT PAIRING CODE
+pairing.requesting=Requesting pairing code for: %1...
+pairing.noDigits=Cannot request pairing code: No numeric digits found in configured number.
+pairing.invalidNumber=Cannot request pairing code: Please set a valid phone number in config.json (currently set to "stupid").
+
+# Connection Settings
+connection.qrReceived=QR Code received! Scan this QR code with your WhatsApp app to log in:
+connection.closedRetry=[System] Connection closed (Code: %1). Attempting reconnect %2/%3 in %4ms...
+connection.failedRetry=[Error] Reconnection failed after %1 attempts. Please restart manually.
+connection.loggedOut=[System] Logged out from WhatsApp. Reconnection stopped.
+connection.success=✓ Connected to WhatsApp!
+
+# Startup Notification
+startup.sending=Sending startup notification to: %1
+startup.message=Hello! The WhatsApp bot is now online and connected.
+startup.failed=Failed to send startup message: %1
+startup.invalidNumber=Target number "%1" is not a valid phone number. Skipping startup message.
+
+# Messaging Settings
+message.received=Received message from %1: %2
+message.replied=Replied to %1 with 'pong!'
+message.pong=pong!
+
+# Database
+database.sqliteConnected=[DATABASE] SQLite Database connected successfully!
+database.sqliteError=[DATABASE ERROR] Failed to connect to SQLite: %1
+database.mongoConnected=[DATABASE] MongoDB connected successfully!
+database.mongoError=[DATABASE ERROR] Failed to connect to MongoDB: %1
+
+# Cherry Bot Settings
+Cherry.googleApiTokenExpired=[Error] Google API Token has expired or is invalid. Please re-authenticate.
+Cherry.newVersionDetected=New version detected! Current: %1, Latest: %2. Please run: %3
+Cherry.autoRestart1=Auto restart scheduled in %1.
+Cherry.autoRestart2=Auto restart scheduled with cron: %1.
+system.botRunning=[System] Bot is already running in background (PID: %1). Please kill it first before starting a new instance.
+system.restarting=Restarting...
+system.alreadyRunning=[System] Bot is already running in background (PID: %1). Please kill it first before starting a new instance.
+
+# Dashboard Settings
+dashboard.unauthorized=Unauthorized
+dashboard.noAdmin=No admin configured in config.json
+dashboard.onlyAdmins=Only admins can access the dashboard
+dashboard.otpSent=OTP sent to your WhatsApp
+dashboard.otpFailed=Failed to send OTP message
+dashboard.notConnected=WhatsApp not connected yet
+dashboard.invalidOtp=Invalid or expired OTP
+dashboard.otpMessage=🍒 *CherryBot Dashboard*\n\nYour Admin OTP is: *%1*\n\n_Do not share this code with anyone. It expires in 5 minutes._
+
+# Command Errors
+command.noExists=Command '%1' does not exist! Use %2help to see available commands.
+command.prefixOnly=Please use %1help to see the list of available commands.
+command.errorReaction=[Error] Error in onReaction for command %1:
+command.errorEdit=[Error] Error in onEdit for command %1:
+command.errorChat=[Error] Error in onChat for command %1:
+command.errorReply=[Error] Error in onReply for command %1:
+command.errorExecute=[Error] Error executing command %1:
+command.adminOnly=❌ You do not have permission to use this command. (Admin only)
+command.groupOnly=❌ This command can only be used in groups by a group admin.
+command.groupAdminOnly=❌ You do not have permission to use this command. (Group Admin only)
+command.fetchMetaError=[Error] Error fetching group metadata for permission check:
+command.verifyPermsFailed=❌ Failed to verify permissions.
+command.cooldown=⏳ Please wait %1 second(s) before using this command again.
+
+# Action Logs
+action.replySent=[SENT] Reply sent to %1
+action.reacted=[SENT] Reacted %1 to %2
+action.edited=[SENT] Edited message in %1
+action.received=[MESSAGE] Received %1 from %2
+
+# Loader Logs
+loader.skipCommand=[Loader] Skipping command '%1' because the compulsory 'author' field is missing.
+loader.loadedCommand=[LOADER] Loaded command: %1
+loader.failedLoadCommand=[Loader] Failed to load command from file %1: %2
+loader.hotReloadedCommand=[Watcher] Hot-reloaded/Loaded command file: %1
+loader.removedCommand=[Watcher] Removed command: %1 (file %2 deleted)
+loader.errorExecutingEvent=[Event: %1] Error executing in %2:
+loader.loadedEvent=[LOADER] Loaded event from: %1
+loader.failedLoadEvent=[Loader] Failed to load event from file %1: %2
+loader.hotReloadedEvent=[Watcher] Hot-reloaded/Loaded event file: %1
+loader.removedEvent=[Watcher] Removed event: %1 from %2 (file deleted)
+loader.checkingDependencies=[SYSTEM] Checking for missing script dependencies...
+loader.installingDependencies=[SYSTEM] Found missing modules in scripts. Installing: %1
+loader.installedDependencies=[SYSTEM] Modules installed successfully!
+loader.failedInstallDependencies=[SYSTEM] Failed to install missing modules.
+loader.loadSummary=[SYSTEM] Loaded %1 commands and %2 events in %3ms
+loader.clearedSession=[System] Cleared invalid session folder: %1
+loader.clearSessionFailed=[System] Failed to clear session folder:
+loader.listening= BOT IS NOW LISTENING FOR MESSAGES 

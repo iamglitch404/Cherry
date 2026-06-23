@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CherryBot Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #f472b6;
+            --primary-glow: rgba(244, 114, 182, 0.4);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(244, 114, 182, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.05) 0%, transparent 50%);
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f472b6, #ec4899, #db2777);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--primary-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem;
+            width: 100%;
+        }
+
+        /* Login Forms */
+        #auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* Dashboard */
+        #dashboard-container {
+            display: none;
+            gap: 2rem;
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* Tables & Data */
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .config-pre {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            background: rgba(244, 114, 182, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CherryBot Admin</h1>
+        <p class="subtitle">Secure WhatsApp Bot Management</p>
+    </header>
+
+    <div class="container">
+        <!-- Auth View -->
+        <div id="auth-container" class="glass-panel">
+            <div id="step-number" style="text-align: center;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Click the button below to send a secure OTP to the primary Admin's WhatsApp number.</p>
+                <button onclick="requestOTP()">Send OTP to Admin</button>
+                <div id="phone-error" class="error-msg"></div>
+            </div>
+
+            <div id="step-otp" style="display: none;">
+                <div class="input-group">
+                    <label>Enter 6-Digit OTP</label>
+                    <input type="text" id="otp-code" placeholder="123456" maxlength="6">
+                </div>
+                <button onclick="verifyOTP()">Verify & Login</button>
+                <div id="otp-error" class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-container">
+            <div class="stats-grid">
+                <div class="glass-panel stat-card">
+                    <div class="stat-label">System Status</div>
+                    <div class="stat-value" id="stat-status"><span class="status-dot"></span>Online</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-label">Commands Loaded</div>
+                    <div class="stat-value" id="stat-cmds">0</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-label">Memory Usage</div>
+                    <div class="stat-value" id="stat-mem">0 MB</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-label">Global Prefix</div>
+                    <div class="stat-value" id="stat-prefix">+</div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h2 class="section-title">Global Configuration</h2>
+                <pre class="config-pre" id="config-view">Loading configuration...</pre>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 2rem;">
+                <h2 class="section-title">User Message Analytics</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>WhatsApp JID</th>
+                                <th>Name</th>
+                                <th>Messages Sent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkAuth() {
+            try {
+                const res = await fetch("/api/auth-status");
+                const data = await res.json();
+                if (data.loggedIn) {
+                    showDashboard();
+                }
+            } catch (e) {}
+        }
+
+        async function requestOTP() {
+            const btn = document.querySelector('#step-number button');
+            const err = document.getElementById('phone-error');
+            
+            err.style.display = 'none';
+            btn.innerText = 'Sending...';
+            
+            try {
+                const res = await fetch("/api/request-otp", {
+                    method: "POST"
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    document.getElementById('step-number').style.display = 'none';
+                    document.getElementById('step-otp').style.display = 'block';
+                } else {
+                    err.innerText = data.error || "Failed to send OTP";
+                    err.style.display = 'block';
+                }
+            } catch (e) {
+                err.innerText = "Network error";
+                err.style.display = 'block';
+            }
+            btn.innerText = 'Send OTP to Admin';
+        }
+
+        async function verifyOTP() {
+            const btn = document.querySelector('#step-otp button');
+            const err = document.getElementById('otp-error');
+            const code = document.getElementById('otp-code').value;
+            
+            if (!code) return;
+            
+            err.style.display = 'none';
+            btn.innerText = 'Verifying...';
+            
+            try {
+                const res = await fetch("/api/verify-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ otp: code })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    showDashboard();
+                } else {
+                    err.innerText = data.error || "Invalid OTP";
+                    err.style.display = 'block';
+                }
+            } catch (e) {
+                err.innerText = "Network error";
+                err.style.display = 'block';
+            }
+            btn.innerText = 'Verify & Login';
+        }
+
+        async function showDashboard() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('dashboard-container').style.display = 'flex';
+            
+            loadStats();
+            loadConfig();
+            loadUsers();
+            setInterval(loadStats, 5000);
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch("/api/stats");
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                document.getElementById('stat-cmds').innerText = data.commandsCount;
+                document.getElementById('stat-mem').innerText = data.memory + " MB";
+                document.getElementById('stat-prefix').innerText = data.prefix;
+            } catch (e) {}
+        }
+
+        async function loadConfig() {
+            try {
+                const res = await fetch("/api/config");
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('config-view').innerText = JSON.stringify(data, null, 4);
+            } catch (e) {
+                document.getElementById('config-view').innerText = "Failed to load config.";
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch("/api/users");
+                if (!res.ok) return;
+                const users = await res.json();
+                
+                const tbody = document.getElementById('users-table');
+                tbody.innerHTML = '';
+                
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted)">No user data found yet.</td></tr>';
+                    return;
+                }
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family: monospace;">${u.id}</td>
+                        <td>${u.name}</td>
+                        <td><span class="badge">${u.messages}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {}
+        }
+
+        // Check login on load
+        checkAuth();
+    </script>
+</body>
+</html>
