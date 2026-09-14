@@ -1,20 +1,25 @@
 // @ts-nocheck
 "use strict";
-createCommand({
+
+commandintro({
   name: "help",
   author: "Yugant Xettri",
-  aliases: ["h", "menu"],
-  prefix: !0,
-  onStart: async (r, c, { reply: s }) => {
-    const n = global.getBotConfig().prefix,
-      e = global.commands,
-      o = new Set(e.values()),
-      t = Array.from(o).map((a) => {
-        const i = a.prefix === !1 ? "" : n,
-          m = a.aliases ? ` (aliases: ${a.aliases.join(", ")})` : "";
-        return `\u2022 *${i}${a.name}*${m}`;
-      }).join(`
-`);
-    await s(t);
+  aliases: ["h", "menu", "cmds"],
+  role: 0,
+  onStart: async (sock, msg, { reply }) => {
+    const prefix = global.getBotConfig().prefix || "!";
+    const uniqueCommands = Array.from(new Set(global.commands.values()));
+
+    const list = uniqueCommands
+      .map((cmd) => {
+        const aliasText = cmd.aliases?.length ? ` (aliases: ${cmd.aliases.join(", ")})` : "";
+        return `• *${prefix}${cmd.name}*${aliasText}`;
+      })
+      .join("\n");
+
+    await reply(
+      `📋 *Available Commands:*\n\n${list}\n\n` +
+      `🍒 *Cherry Bot* — Made by Yugant Xettri`
+    );
   },
 });

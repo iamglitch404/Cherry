@@ -1,12 +1,14 @@
 // @ts-nocheck
 "use strict";
-createCommand({
+
+commandintro({
   name: "prefix",
   author: "Yugant Xettri",
   aliases: ["myprefix", "getprefix"],
-  prefix: !1,
-  onStart: async (r, t, { react: e, reply: a }) => {
-    const i = global.getBotConfig().prefix;
-    (await e("\u2139\uFE0F"), await a(`My current prefix is: *${i}*`));
+  role: 0,
+  onStart: async (sock, msg, { react, reply }) => {
+    const prefix = global.getBotConfig().prefix || "!";
+    await react("ℹ️");
+    await reply(`My current prefix is: *${prefix}*`);
   },
 });

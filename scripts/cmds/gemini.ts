@@ -1,153 +1,191 @@
 // @ts-nocheck
 "use strict";
-import { GoogleGenerativeAI as Y } from "@google/generative-ai";
-import { downloadMediaMessage as j } from "@whiskeysockets/baileys";
-(global.geminiChatHistory || (global.geminiChatHistory = new Map()),
-  (!global.geminiSentMessageIds ||
-    global.geminiSentMessageIds instanceof Set) &&
-    (global.geminiSentMessageIds = new Map()));
-const API_KEY = "AQ.Ab8RN6LU7UKIh0FWYZx5SuUM4tYvxz0HSYIErgqgYqDVOLZ7Ag",
-  v = global.geminiChatHistory,
-  _ = global.geminiSentMessageIds;
-async function C(p, e, n, M) {
-  const {
-      reply: o,
-      react: d,
-      args: h,
-      remoteJid: f,
-      quotedMsg: a,
-      senderJid: S,
-    } = n,
-    x = API_KEY;
-  if (!x || x === "YOUR_GEMINI_API_KEY_HERE") {
-    await o(
-      "\u274C Gemini API key not set in the script.\n\nGet a free key at: https://aistudio.google.com/app/apikey",
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { downloadMediaMessage } from "@whiskeysockets/baileys";
+
+global.geminiChatHistory = global.geminiChatHistory || new Map();
+global.geminiSentMessageIds = global.geminiSentMessageIds || new Map();
+
+const chatHistory = global.geminiChatHistory;
+const sentMessageIds = global.geminiSentMessageIds;
+
+function getApiKey() {
+  return process.env.GEMINI_API_KEY || global.getBotConfig?.().geminiApiKey || "";
+}
+
+async function handleGemini(sock, msg, context, customPrompt) {
+  const { reply, react, args, remoteJid, quotedMsg, senderJid } = context;
+  const apiKey = getApiKey();
+
+  if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
+    await reply(
+      "❌ Gemini API key is not configured. Set GEMINI_API_KEY in environment or geminiApiKey in config.json.\n\nGet a free key at: https://aistudio.google.com/app/apikey"
     );
     return;
   }
-  let s = null,
-    t = null,
-    r = !1;
-  e.message?.imageMessage
-    ? ((s = "image"), (t = e.message.imageMessage), (r = !0))
-    : a?.imageMessage
-      ? ((s = "image"), (t = a.imageMessage))
-      : e.message?.documentMessage
-        ? ((s = "document"), (t = e.message.documentMessage), (r = !0))
-        : a?.documentMessage
-          ? ((s = "document"), (t = a.documentMessage))
-          : e.message?.videoMessage
-            ? ((s = "video"), (t = e.message.videoMessage), (r = !0))
-            : a?.videoMessage
-              ? ((s = "video"), (t = a.videoMessage))
-              : e.message?.audioMessage
-                ? ((s = "audio"), (t = e.message.audioMessage), (r = !0))
-                : a?.audioMessage && ((s = "audio"), (t = a.audioMessage));
-  let g = M !== void 0 ? M : h.join(" ").trim();
-  if (!g && r && t?.caption) {
-    const i = global.getBotConfig(),
-      l = t.caption || "";
-    g = (l.startsWith(i.prefix) ? l.slice(i.prefix.length).trim() : l)
-      .split(/\s+/)
-      .slice(1)
-      .join(" ")
-      .trim();
+
+  // Detect any media (direct or quoted)
+  let mediaType = null;
+  let mediaMessage = null;
+  let isDirectMedia = false;
+
+  if (msg.message?.imageMessage) {
+    mediaType = "image";
+    mediaMessage = msg.message.imageMessage;
+    isDirectMedia = true;
+  } else if (quotedMsg?.imageMessage) {
+    mediaType = "image";
+    mediaMessage = quotedMsg.imageMessage;
+  } else if (msg.message?.documentMessage) {
+    mediaType = "document";
+    mediaMessage = msg.message.documentMessage;
+    isDirectMedia = true;
+  } else if (quotedMsg?.documentMessage) {
+    mediaType = "document";
+    mediaMessage = quotedMsg.documentMessage;
+  } else if (msg.message?.videoMessage) {
+    mediaType = "video";
+    mediaMessage = msg.message.videoMessage;
+    isDirectMedia = true;
+  } else if (quotedMsg?.videoMessage) {
+    mediaType = "video";
+    mediaMessage = quotedMsg.videoMessage;
+  } else if (msg.message?.audioMessage) {
+    mediaType = "audio";
+    mediaMessage = msg.message.audioMessage;
+    isDirectMedia = true;
+  } else if (quotedMsg?.audioMessage) {
+    mediaType = "audio";
+    mediaMessage = quotedMsg.audioMessage;
   }
-  const A = g.toLowerCase();
-  if (A === "reset" || A === "clear") {
-    (v.delete(f),
-      await o("\u{1F9F9} Gemini chat memory has been cleared for this chat."));
+
+  let prompt = customPrompt !== undefined ? customPrompt : args.join(" ").trim();
+
+  // If caption is present with media
+  if (!prompt && isDirectMedia && mediaMessage?.caption) {
+    const config = global.getBotConfig();
+    const caption = mediaMessage.caption || "";
+    const cleaned = caption.startsWith(config.prefix) ? caption.slice(config.prefix.length).trim() : caption;
+    prompt = cleaned.split(/\s+/).slice(1).join(" ").trim();
+  }
+
+  const lowerPrompt = prompt.toLowerCase();
+  if (lowerPrompt === "reset" || lowerPrompt === "clear") {
+    chatHistory.delete(remoteJid);
+    await reply("🧹 Gemini chat memory has been cleared for this chat.");
     return;
   }
-  if (!t && !g) {
-    await o(`\u{1F4A1} Usage:
-\u2022 *-gemini <question>*
-\u2022 Reply to or send a document/image/video/audio with *-gemini <question>*
-\u2022 Use *-gemini reset* or *-gemini clear* to clear conversation memory.`);
+
+  if (!mediaMessage && !prompt) {
+    await reply(
+      "💡 *Gemini Usage:*\n" +
+      "• *-gemini <question>*\n" +
+      "• Reply to an image/video/doc/audio with *-gemini <question>*\n" +
+      "• Use *-gemini reset* to clear conversation memory."
+    );
     return;
   }
-  await d("\u{1F916}");
+
+  await react("🤖");
+
   try {
-    const l = new Y(x).getGenerativeModel({
+    const client = new GoogleGenerativeAI(apiKey);
+    const model = client.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction:
-        "You are a helpful and fun conversational AI. You MUST respond ONLY in casual Romanized Nepali (Nepenglish), meaning Nepali language written in the English alphabet. Keep your answers very short, friendly, and natural like a text message.",
+        "You are a helpful and fun conversational AI. You MUST respond ONLY in casual Romanized Nepali (Nepenglish), meaning Nepali language written in the English alphabet. Keep your answers short, friendly, and natural like a text message.",
     });
-    let G = v.get(f) || [],
-      u = [];
-    if (t) {
-      const m = r ? e : { key: e.key, message: { [`${s}Message`]: t } },
-        y = await j(m, "buffer", {}),
-        P =
-          t.mimetype ||
-          (s === "image"
-            ? "image/jpeg"
-            : s === "video"
-              ? "video/mp4"
-              : s === "audio"
-                ? "audio/mp4"
-                : "application/octet-stream");
-      let w = "";
-      (s === "document" &&
-        t.fileName &&
-        (w = `[Attached File: ${t.fileName}]
-`),
-        u.push({ text: w + (g || `Describe or analyze this ${s}.`) }),
-        u.push({ inlineData: { data: y.toString("base64"), mimeType: P } }));
-    } else u.push({ text: g });
-    const k = l.startChat({ history: G });
-    let E;
-    const T = 3,
-      N = 3e3;
-    for (let m = 1; m <= T; m++)
-      try {
-        E = await k.sendMessage(u);
-        break;
-      } catch (y) {
-        if ((y?.message?.includes("503") || y?.status === 503) && m < T)
-          (console.log(`[Gemini] 503 on attempt ${m}, retrying in ${N}ms...`),
-            await new Promise((w) => setTimeout(w, N)));
-        else throw y;
+
+    const history = chatHistory.get(remoteJid) || [];
+    const contents = [];
+
+    if (mediaMessage) {
+      const mediaSource = isDirectMedia ? msg : { key: msg.key, message: { [`${mediaType}Message`]: mediaMessage } };
+      const mediaBuffer = await downloadMediaMessage(mediaSource, "buffer", {});
+      const mimeType = mediaMessage.mimetype || (
+        mediaType === "image" ? "image/jpeg" :
+        mediaType === "video" ? "video/mp4" :
+        mediaType === "audio" ? "audio/mp4" :
+        "application/octet-stream"
+      );
+
+      let docHeader = "";
+      if (mediaType === "document" && mediaMessage.fileName) {
+        docHeader = `[Attached File: ${mediaMessage.fileName}]\n`;
       }
-    let b = E.response.text().trim();
-    b = b.replace(/\*\*/g, "*");
-    const R = await o(b || "\u{1F914} No response from Gemini.");
-    R?.key?.id && _.set(R.key.id, S);
-    let c = await k.getHistory();
-    const H = 20;
-    (c.length > H && ((c = c.slice(-H)), c[0]?.role === "model" && c.shift()),
-      v.set(f, c));
-  } catch (i) {
-    (console.error("[Gemini] Error:", i),
-      i?.message?.includes("503") ||
-        i?.status === 503 ||
-        (await o(`\u274C Gemini error: ${i?.message || String(i)}`)));
+
+      contents.push({ text: docHeader + (prompt || `Describe or analyze this ${mediaType}.`) });
+      contents.push({ inlineData: { data: mediaBuffer.toString("base64"), mimeType } });
+    } else {
+      contents.push({ text: prompt });
+    }
+
+    const chat = model.startChat({ history });
+    let response;
+    const maxRetries = 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        response = await chat.sendMessage(contents);
+        break;
+      } catch (err) {
+        if ((err?.message?.includes("503") || err?.status === 503) && attempt < maxRetries) {
+          console.log(`[Gemini] 503 on attempt ${attempt}, retrying in 3s...`);
+          await new Promise((r) => setTimeout(r, 3000));
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    let answer = response.response.text().trim();
+    answer = answer.replace(/\*\*/g, "*");
+
+    const sent = await reply(answer || "🤔 No response received from Gemini.");
+    if (sent?.key?.id) {
+      sentMessageIds.set(sent.key.id, senderJid);
+    }
+
+    // Keep the last 20 messages of context
+    let updatedHistory = await chat.getHistory();
+    if (updatedHistory.length > 20) {
+      updatedHistory = updatedHistory.slice(-20);
+      if (updatedHistory[0]?.role === "model") updatedHistory.shift();
+    }
+    chatHistory.set(remoteJid, updatedHistory);
+  } catch (err) {
+    console.error("[Gemini] Error:", err);
+    if (!err?.message?.includes("503") && err?.status !== 503) {
+      await reply(`❌ Gemini error: ${err?.message || String(err)}`);
+    }
   }
 }
-createCommand({
+
+commandintro({
   name: "gemini",
   author: "Yugant Xettri",
   aliases: ["ai", "ask"],
-  prefix: !0,
-  onStart: async (p, e, n) => {
-    await C(p, e, n);
+  role: 0,
+  onStart: async (sock, msg, context) => {
+    await handleGemini(sock, msg, context);
   },
-  onReply: async (p, e, n) => {
-    const { senderJid: M } = n,
-      d = (
-        e.message?.extendedTextMessage?.contextInfo ||
-        e.message?.imageMessage?.contextInfo ||
-        e.message?.videoMessage?.contextInfo ||
-        e.message?.documentMessage?.contextInfo
-      )?.stanzaId,
-      h = d ? _.get(d) : null;
-    if (d && h) {
-      if (M !== h) return;
-      const f = global.getBotConfig(),
-        a = n.senderText || "";
-      if (!a.startsWith(f.prefix)) {
-        const I = a.trim();
-        await C(p, e, n, I);
+  onReply: async (sock, msg, context) => {
+    const { senderJid } = context;
+    const stanzaId = (
+      msg.message?.extendedTextMessage?.contextInfo ||
+      msg.message?.imageMessage?.contextInfo ||
+      msg.message?.videoMessage?.contextInfo ||
+      msg.message?.documentMessage?.contextInfo
+    )?.stanzaId;
+
+    const originalSender = stanzaId ? sentMessageIds.get(stanzaId) : null;
+    if (stanzaId && originalSender) {
+      if (senderJid !== originalSender) return;
+      const config = global.getBotConfig();
+      const text = context.senderText || "";
+      if (!text.startsWith(config.prefix)) {
+        await handleGemini(sock, msg, context, text.trim());
       }
     }
   },

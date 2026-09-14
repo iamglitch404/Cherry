@@ -1,9 +1,351 @@
 // @ts-nocheck
-"use strict";import i from"axios";import A from"fs-extra";import D from"cheerio";import C from"https";import E from"moment-timezone";import O from"mime-db";import m from"lodash";import{google as u}from"googleapis";import N from"ora";import x from"./logger/log.ts";import{isHexColor as b,colors as l}from"./func/colors.ts";import w from"./func/prisim.ts";const I=new C.Agent({rejectUnauthorized:!1}),f=global.Cherry?.config||{},P=f.credentials?.gmailAccount||{},{clientId:T,clientSecret:k,refreshToken:F,apiKey:S}=P,p=T?u.drive({version:"v3",auth:(({setCredentials:e})=>{e({refresh_token:F})}).call(new u.auth.OAuth2(T,k,"https://developers.google.com/oauthplayground"))}):null;class g extends Error{constructor(t){super(t?.message||t),Object.assign(this,typeof t=="string"?{}:t)}}const J=(e,t)=>{let a=0;for(let r=t>0?0:e.length-1;(t>0?r<e.length:r>=0)&&e[r]==" ";r+=t)a++;return a};export const convertTime=(e,t="s",a="m",r="h",n="d",s="M",y="y",o=!1)=>{typeof t=="boolean"&&(o=t,t="s");let c="",h=[{v:Math.floor(e/1e3/60/60/24/30/12),r:y},{v:Math.floor(e/1e3/60/60/24/30%12),r:s},{v:Math.floor(e/1e3/60/60/24%30),r:n},{v:Math.floor(e/1e3/60/60%24),r},{v:Math.floor(e/1e3/60%60),r:a},{v:Math.floor(e/1e3%60),r:t}];return h.forEach((d,$)=>{d.v?c+=d.v+d.r:c?c+="00"+d.r:$==h.length-1&&(c+="0"+d.r)}),o?c.replace(/00\w+/g,""):c||"0"+t},createOraDots=e=>{let t=N({text:e,spinner:{interval:80,frames:["\u280B","\u2819","\u2839","\u2838","\u283C","\u2834","\u2826","\u2827","\u2807","\u280F"]}});return Object.assign(t,{_start:()=>{enableStderrClearLine(!1),t.start()},_stop:()=>{enableStderrClearLine(!0),t.stop()}})};export class TaskQueue{constructor(t){this.cb=t}cb;q=[];r=null;push(t){this.q.push(t),this.q.length==1&&this.next()}next(){this.q.length>0&&(this.r=this.q[0],this.cb(this.r,()=>{this.r=null,this.q.shift(),this.next()}))}length(){return this.q.length}}const M=process.stderr.clearLine;export const enableStderrClearLine=(e=!0)=>process.stderr.clearLine=e?M:()=>{},formatNumber=e=>Number(e).toLocaleString(f.language||"en-US"),getExtFromAttachmentType=e=>({photo:"png",animated_image:"gif",video:"mp4",audio:"mp3"})[e]||"txt",getExtFromMimeType=(e="")=>(O[e]?.extensions||[])[0]||"unknow",getExtFromUrl=(e="")=>{let t=e.match(/(?<=https:\/\/cdn.fbsbx.com\/v\/.*?\/|https:\/\/video.xx.fbcdn.net\/v\/.*?\/|https:\/\/scontent.xx.fbcdn.net\/v\/.*?\/).*?(\/|\?)/g);if(!t)return"";let a=t[0].slice(0,-1);return a.slice(a.lastIndexOf(".")+1)},getPrefix=e=>global.db?.allThreadData?.find(t=>t.threadID==e)?.data?.prefix||f.prefix,getTime=(e,t)=>E(t?e:void 0).tz(f.timeZone||"UTC").format(t||e),getType=e=>Object.prototype.toString.call(e).slice(8,-1),isNumber=e=>!isNaN(parseFloat(e)),jsonStringifyColor=(e,t,a=0,r=0)=>{let n="",s=" ".repeat,y=a+r*a;return typeof e=="string"?n+=l.green(`"${e}"`):typeof e=="number"||typeof e=="boolean"||e===null?n+=l.yellow(e):e===void 0?n+=l.gray("undefined"):typeof e!="function"?Array.isArray(e)?e.length?(n+=l.gray(`[
-`),e.forEach(o=>n+=s(y)+jsonStringifyColor(o,t,a,r+1)+`,
-`),n=n.replace(/,\n$/,`
-`)+s(r*a)+l.gray("]")):n+="[]":Object.keys(e).length?(n+=l.gray(`{
-`),Object.keys(e).forEach(o=>{let c=e[o];if(t){if(typeof t=="function")c=t(o,c);else if(t.indexOf(o)<0)return}(!isNaN(o[0])||o.match(/[^a-zA-Z0-9_]/))&&(o=l.green(JSON.stringify(o))),n+=s(y)+`${o}:${a?" ":""}${jsonStringifyColor(c,t,a,r+1)},
-`}),n=n.replace(/,\n$/,`
-`)+s(r*a)+l.gray("}")):n+="{}":n+=l.green(e.toString()),n=n.replace(/,$/gm,l.gray(",")),a===0?n.replace(/\n/g,""):n},message=(e,t)=>({send:async(a,r)=>e.sendMessage(a,t.threadID,r),reply:async(a,r)=>e.sendMessage(a,t.threadID,r,t.messageID),unsend:async(a,r)=>e.unsendMessage(a,r),reaction:async(a,r,n)=>e.setMessageReaction(a,r,n,!0),err:async a=>e.sendMessage(global.utils?.getText("utils","errorOccurred",typeof a=="object"&&!a.stack?removeHomeDir(JSON.stringify(a,null,2)):removeHomeDir(`${a.name||a.error}: ${a.message}`)),t.threadID,t.messageID),error:async a=>e.sendMessage(global.utils?.getText("utils","errorOccurred",typeof a=="object"&&!a.stack?removeHomeDir(JSON.stringify(a,null,2)):removeHomeDir(`${a.name||a.error}: ${a.message}`)),t.threadID,t.messageID)}),randomString=(e=10,t=!1,a="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")=>{let r="";for(let n=0;n<e;n++){let s=Math.floor(Math.random()*a.length);if(t)for(;r.includes(a[s]);)s=Math.floor(Math.random()*a.length);r+=a[s]}return r},randomNumber=(e,t)=>(t===void 0&&(t=e,e=0),Math.floor(Math.random()*(t-e+1))+e),removeHomeDir=e=>{for(;e.includes(process.cwd());)e=e.replace(process.cwd(),"");return e},splitPage=(e,t)=>({totalPage:m.chunk(e,t).length,allPage:m.chunk(e,t)}),translateAPI=async(e,t)=>i.get(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${t}&dt=t&q=${encodeURIComponent(e)}`).then(a=>a.data[0][0][0]).catch(a=>{throw new g(a.response?.data||a)}),downloadFile=async(e,t)=>i.get(e,{responseType:"arraybuffer"}).then(a=>(A.writeFileSync(t,Buffer.from(a.data)),t)).catch(a=>{throw new g(a.response?.data||a)}),findUid=async e=>i.post("https://seomagnifier.com/fbid",new URLSearchParams({facebook:"1",sitelink:e}),{headers:{"content-type":"application/x-www-form-urlencoded; charset=UTF-8",Cookie:"PHPSESSID=0d8feddd151431cf35ccb0522b056dc6"}}).then(async t=>{let a=t.data;if(isNaN(a)){let r=await i.get(e),n=D.load(r.data),s=n('meta[property="al:android:url"]').attr("content");if(!s)throw new Error("UID not found");return s.split("/").pop()}return a}).catch(()=>{throw new Error("An unexpected error occurred. Please try again.")}),getStreamsFromAttachment=async e=>Promise.all(e.map(t=>i({url:t.url,method:"GET",responseType:"stream"}).then(a=>(a.data.path=`${randomString(10)}.${getExtFromUrl(t.url)}`,a.data)))),getStreamFromURL=async(e,t="",a={})=>i({url:e,method:"GET",responseType:"stream",...a}).then(r=>(r.data.path=t||randomString(10)+(r.headers["content-type"]?"."+getExtFromMimeType(r.headers["content-type"]):".noext"),r.data)),translate=async(e,t="en")=>e,shortenURL=async e=>i.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(e)}`).then(t=>t.data).catch(t=>{throw Object.assign(new Error,t.response?.data||{message:t.message})}),uploadImgbb=async e=>{let t=typeof e=="string"&&/(https?:\/\/)/.test(e)?"url":"file";return i.get("https://imgbb.com").then(a=>i.post("https://imgbb.com/json",{source:e,type:t,action:"upload",timestamp:Date.now(),auth_token:a.data.match(/auth_token="([^"]+)"/)[1]},{headers:{"content-type":"multipart/form-data"}})).then(a=>a.data).catch(a=>{throw new g(a.response?.data||a)})},uploadZippyshare=async e=>i.post("https://api.zippysha.re/upload",{file:e},{httpsAgent:I,headers:{"Content-Type":"multipart/form-data"}}).then(async t=>(t.data.data.file.url.download=(await i.get(t.data.data.file.url.full,{httpsAgent:I,headers:{"user-agent":"Mozilla/5.0"}})).data.match(/id="download-url"(?:.|\n)*?href="(.+?)"/)[1],t.data)),drive={default:p,parentID:"",uploadFile:async function(e,t,a){!a&&typeof e=="string"&&(a=t,t=void 0);let r=(await p.files.create({resource:{name:e,parents:[this.parentID]},media:{mimeType:t,body:a},fields:"*"})).data;return await this.makePublic(r.id),r},deleteFile:async e=>p.files.delete({fileId:e}).then(()=>!0).catch(t=>{throw new Error(t.errors.map(a=>a.message).join(`
-`))}),getUrlDownload:e=>`https://docs.google.com/uc?id=${e}&export=download&confirm=t${S?`&key=${S}`:""}`,getFile:async(e,t="arraybuffer")=>p.files.get({fileId:e,alt:"media"},{responseType:t}).then(a=>t=="arraybuffer"?Buffer.from(a.data):(a.data.path=a.headers["content-disposition"]?.split('filename="')[1]?.split('"')[0]||`${randomString(10)}.${getExtFromMimeType(a.headers["content-type"])}`,a.data)),getFileName:async e=>global.temp?.filesOfGoogleDrive?.fileNames[e]||p.files.get({fileId:e,fields:"name"}).then(t=>(global.temp.filesOfGoogleDrive.fileNames[e]=t.data.name,t.data.name)),makePublic:async e=>p.permissions.create({fileId:e,requestBody:{role:"reader",type:"anyone"}}).then(()=>e),checkAndCreateParentFolder:async e=>{let a=(await p.files.list({q:`name="${e}" and mimeType="application/vnd.google-apps.folder" and trashed=false`,fields:"*"})).data.files.find(r=>r.ownedByMe);if(!a){let r=await p.files.create({requestBody:{name:e,mimeType:"application/vnd.google-apps.folder"}});return await p.permissions.create({fileId:r.data.id,requestBody:{role:"reader",type:"anyone"}}),r.data.id}return a.shared||await p.permissions.create({fileId:a.id,requestBody:{role:"reader",type:"anyone"}}),a.id}};export class GoatBotApis{constructor(t){this.apiKey=t;this.api=i.create({baseURL:"https://goatbot.tk/api",headers:{"x-api-key":t}})}apiKey;api;isSetApiKey(){return!!this.apiKey}getApiKey(){return this.apiKey}async getAccountInfo(){return(await this.api.get("/info")).data}}export{l as colors,b as isHexColor,x as log,w as Prism,g as CustomError};export const getText=(e,t,...a)=>global.lang?.[e]?.[t]?.(...a)||"",getStreamFromUrl=getStreamFromURL;export default{colors:l,isHexColor:b,log:x,Prism:w,CustomError:g,convertTime,createOraDots,TaskQueue,enableStderrClearLine,defaultStderrClearLine:M,formatNumber,getExtFromAttachmentType,getExtFromMimeType,getExtFromUrl,getPrefix,getText,getTime,getType,isNumber,jsonStringifyColor,message,randomString,randomNumber,removeHomeDir,splitPage,translateAPI,downloadFile,findUid,getStreamsFromAttachment,getStreamFromURL,getStreamFromUrl,translate,shortenURL,uploadImgbb,uploadZippyshare,drive,GoatBotApis};
+"use strict";
+
+import axios from "axios";
+import fsExtra from "fs-extra";
+import * as cheerio from "cheerio";
+import https from "https";
+import moment from "moment-timezone";
+import mimeDb from "mime-db";
+import lodash from "lodash";
+import ora from "ora";
+import log from "./logger/log.ts";
+import { isHexColor, colors } from "./func/colors.ts";
+import Prism from "./func/prisim.ts";
+
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
+export class CustomError extends Error {
+  constructor(err) {
+    super(err?.message || err);
+    Object.assign(this, typeof err === "string" ? {} : err);
+  }
+}
+
+export const convertTime = (
+  ms,
+  secUnit = "s",
+  minUnit = "m",
+  hourUnit = "h",
+  dayUnit = "d",
+  monthUnit = "M",
+  yearUnit = "y",
+  hideZero = false
+) => {
+  if (typeof secUnit === "boolean") {
+    hideZero = secUnit;
+    secUnit = "s";
+  }
+
+  let result = "";
+  const units = [
+    { value: Math.floor(ms / 1000 / 60 / 60 / 24 / 30 / 12), unit: yearUnit },
+    { value: Math.floor((ms / 1000 / 60 / 60 / 24 / 30) % 12), unit: monthUnit },
+    { value: Math.floor((ms / 1000 / 60 / 60 / 24) % 30), unit: dayUnit },
+    { value: Math.floor((ms / 1000 / 60 / 60) % 24), unit: hourUnit },
+    { value: Math.floor((ms / 1000 / 60) % 60), unit: minUnit },
+    { value: Math.floor((ms / 1000) % 60), unit: secUnit },
+  ];
+
+  units.forEach((item, index) => {
+    if (item.value) {
+      result += item.value + item.unit;
+    } else if (result) {
+      result += "00" + item.unit;
+    } else if (index === units.length - 1) {
+      result += "0" + item.unit;
+    }
+  });
+
+  return hideZero ? result.replace(/00\w+/g, "") : result || "0" + secUnit;
+};
+
+const originalClearLine = process.stderr.clearLine;
+export const enableStderrClearLine = (enabled = true) => {
+  process.stderr.clearLine = enabled ? originalClearLine : () => {};
+};
+
+export const createOraDots = (text) => {
+  const spinner = ora({
+    text,
+    spinner: {
+      interval: 80,
+      frames: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
+    },
+  });
+
+  return Object.assign(spinner, {
+    _start: () => {
+      enableStderrClearLine(false);
+      spinner.start();
+    },
+    _stop: () => {
+      enableStderrClearLine(true);
+      spinner.stop();
+    },
+  });
+};
+
+export class TaskQueue {
+  constructor(callback) {
+    this.cb = callback;
+    this.queue = [];
+    this.running = null;
+  }
+
+  push(task) {
+    this.queue.push(task);
+    if (this.queue.length === 1) {
+      this.next();
+    }
+  }
+
+  next() {
+    if (this.queue.length > 0) {
+      this.running = this.queue[0];
+      this.cb(this.running, () => {
+        this.running = null;
+        this.queue.shift();
+        this.next();
+      });
+    }
+  }
+
+  length() {
+    return this.queue.length;
+  }
+}
+
+export const formatNumber = (num) => {
+  const config = global.Cherry?.config || {};
+  return Number(num).toLocaleString(config.language || "en-US");
+};
+
+export const getExtFromAttachmentType = (type) => {
+  const map = {
+    photo: "png",
+    animated_image: "gif",
+    video: "mp4",
+    audio: "mp3",
+  };
+  return map[type] || "txt";
+};
+
+export const getExtFromMimeType = (mime = "") => {
+  return mimeDb[mime]?.extensions?.[0] || "unknown";
+};
+
+export const getExtFromUrl = (url = "") => {
+  const match = url.match(/\.([a-zA-Z0-9]+)(?:\?|#|$)/);
+  return match ? match[1] : "";
+};
+
+export const getPrefix = (remoteJid) => {
+  const config = global.getBotConfig ? global.getBotConfig() : global.Cherry?.config || {};
+  return config.prefix || "!";
+};
+
+export const getTime = (time, format) => {
+  const config = global.Cherry?.config || {};
+  return moment(format ? time : undefined)
+    .tz(config.timeZone || "UTC")
+    .format(format || time);
+};
+
+export const getType = (obj) => {
+  return Object.prototype.toString.call(obj).slice(8, -1);
+};
+
+export const isNumber = (val) => {
+  return !isNaN(parseFloat(val)) && isFinite(val);
+};
+
+export const jsonStringifyColor = (obj, filter, indent = 0, depth = 0) => {
+  const pad = " ".repeat(indent + depth * indent);
+  let output = "";
+
+  if (typeof obj === "string") {
+    return colors.green(`"${obj}"`);
+  }
+  if (typeof obj === "number" || typeof obj === "boolean" || obj === null) {
+    return colors.yellow(String(obj));
+  }
+  if (obj === undefined) {
+    return colors.gray("undefined");
+  }
+  if (typeof obj !== "object") {
+    return colors.green(obj.toString());
+  }
+
+  if (Array.isArray(obj)) {
+    if (!obj.length) return "[]";
+    output += colors.gray("[\n");
+    obj.forEach((item) => {
+      output += pad + jsonStringifyColor(item, filter, indent, depth + 1) + ",\n";
+    });
+    output = output.replace(/,\n$/, "\n") + " ".repeat(depth * indent) + colors.gray("]");
+    return output;
+  }
+
+  const keys = Object.keys(obj);
+  if (!keys.length) return "{}";
+
+  output += colors.gray("{\n");
+  keys.forEach((key) => {
+    let val = obj[key];
+    if (typeof filter === "function") {
+      val = filter(key, val);
+    }
+    const formattedKey = /[^a-zA-Z0-9_]/.test(key) ? colors.green(JSON.stringify(key)) : key;
+    output += `${pad}${formattedKey}:${indent ? " " : ""}${jsonStringifyColor(val, filter, indent, depth + 1)},\n`;
+  });
+  output = output.replace(/,\n$/, "\n") + " ".repeat(depth * indent) + colors.gray("}");
+  return output;
+};
+
+export const randomString = (length = 10, unique = false, chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") => {
+  let str = "";
+  for (let i = 0; i < length; i++) {
+    let char = chars[Math.floor(Math.random() * chars.length)];
+    if (unique) {
+      while (str.includes(char)) {
+        char = chars[Math.floor(Math.random() * chars.length)];
+      }
+    }
+    str += char;
+  }
+  return str;
+};
+
+export const randomNumber = (min, max) => {
+  if (max === undefined) {
+    max = min;
+    min = 0;
+  }
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const removeHomeDir = (str) => {
+  if (typeof str !== "string") return str;
+  return str.split(process.cwd()).join("");
+};
+
+export const splitPage = (array, pageSize) => {
+  const chunks = lodash.chunk(array, pageSize);
+  return {
+    totalPage: chunks.length,
+    allPage: chunks,
+  };
+};
+
+export const translateAPI = async (text, targetLang) => {
+  try {
+    const res = await axios.get(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+    );
+    return res.data[0][0][0];
+  } catch (err) {
+    throw new CustomError(err.response?.data || err);
+  }
+};
+
+export const downloadFile = async (url, targetPath) => {
+  try {
+    const res = await axios.get(url, { responseType: "arraybuffer" });
+    fsExtra.writeFileSync(targetPath, Buffer.from(res.data));
+    return targetPath;
+  } catch (err) {
+    throw new CustomError(err.response?.data || err);
+  }
+};
+
+export const getStreamFromURL = async (url, customPath = "", options = {}) => {
+  const res = await axios({ url, method: "GET", responseType: "stream", ...options });
+  const ext = res.headers["content-type"] ? "." + getExtFromMimeType(res.headers["content-type"]) : ".noext";
+  res.data.path = customPath || `${randomString(10)}${ext}`;
+  return res.data;
+};
+
+export const getStreamFromUrl = getStreamFromURL;
+
+export const getStreamsFromAttachment = async (attachments) => {
+  return Promise.all(
+    attachments.map(async (att) => {
+      const res = await axios({ url: att.url, method: "GET", responseType: "stream" });
+      res.data.path = `${randomString(10)}.${getExtFromUrl(att.url)}`;
+      return res.data;
+    })
+  );
+};
+
+export const shortenURL = async (url) => {
+  try {
+    const res = await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+    return res.data;
+  } catch (err) {
+    throw new CustomError(err.response?.data || err);
+  }
+};
+
+export const uploadImgbb = async (fileOrUrl) => {
+  try {
+    const page = await axios.get("https://imgbb.com");
+    const authToken = page.data.match(/auth_token="([^"]+)"/)?.[1];
+    const isUrl = typeof fileOrUrl === "string" && /^https?:\/\//.test(fileOrUrl);
+
+    const res = await axios.post(
+      "https://imgbb.com/json",
+      {
+        source: fileOrUrl,
+        type: isUrl ? "url" : "file",
+        action: "upload",
+        timestamp: Date.now(),
+        auth_token: authToken,
+      },
+      { headers: { "content-type": "multipart/form-data" } }
+    );
+    return res.data;
+  } catch (err) {
+    throw new CustomError(err.response?.data || err);
+  }
+};
+
+export const getText = (category, key, ...args) => {
+  return global.lang?.[category]?.[key]?.(...args) || "";
+};
+
+export { colors, isHexColor, log, Prism };
+
+export default {
+  colors,
+  isHexColor,
+  log,
+  Prism,
+  CustomError,
+  convertTime,
+  createOraDots,
+  TaskQueue,
+  enableStderrClearLine,
+  defaultStderrClearLine: originalClearLine,
+  formatNumber,
+  getExtFromAttachmentType,
+  getExtFromMimeType,
+  getExtFromUrl,
+  getPrefix,
+  getText,
+  getTime,
+  getType,
+  isNumber,
+  jsonStringifyColor,
+  randomString,
+  randomNumber,
+  removeHomeDir,
+  splitPage,
+  translateAPI,
+  downloadFile,
+  getStreamsFromAttachment,
+  getStreamFromURL,
+  getStreamFromUrl,
+  shortenURL,
+  uploadImgbb,
+};

@@ -6,3 +6,11 @@ dist/
 build/
 *.sqlite
 database/*.sqlite
+*.db
+database/*.db
+*.log
+database/*.log
+bot.lock
+*-player-script.js
+downloads/
+temp/

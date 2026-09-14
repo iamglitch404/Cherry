@@ -1,23 +1,30 @@
 // @ts-nocheck
 "use strict";
-createCommand({
+
+commandintro({
   name: "lid",
   author: "Yugant Xettri",
   aliases: ["mylid", "chatlid"],
-  prefix: !0,
-  onStart: async (s, n, { reply: a, senderJid: m }) => {
-    let t = "Not found";
-    try {
-      const e = JSON.stringify(n).match(/\b\d+(?::\d+)?@lid\b/g);
-      if (e) {
-        const d = Array.from(new Set(e)),
-          o = s.authState.creds.me?.lid || "",
-          i = d.find((c) => c !== o);
-        i && (t = i);
+  role: 0,
+  onStart: async (sock, msg, { reply, senderJid }) => {
+    let lid = "Not found";
+
+    if (senderJid && senderJid.endsWith("@lid")) {
+      lid = senderJid;
+    } else {
+      try {
+        const matches = JSON.stringify(msg).match(/\b\d+(?::\d+)?@lid\b/g);
+        if (matches) {
+          const unique = Array.from(new Set(matches));
+          const botLid = sock.authState?.creds?.me?.lid || "";
+          const userLid = unique.find((id) => id !== botLid);
+          if (userLid) lid = userLid;
+        }
+      } catch (err) {
+        console.error("[LID] Error scanning for LID:", err);
       }
-    } catch (r) {
-      console.error("Error scanning for LIDs:", r);
     }
-    await a(`Your LID is: \`${t}\``);
+
+    await reply(`*Your LID:* \`${lid}\``);
   },
 });

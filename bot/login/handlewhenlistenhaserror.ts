@@ -14,7 +14,7 @@ function getTimePrefix() {
     let tz = "UTC";
     try {
         const config = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, "config.json"), "utf-8"));
-        if (config.timezone) tz = config.timezone;
+        if (config.timeZone || config.timezone) tz = config.timeZone || config.timezone;
     } catch {}
     return `\x1B[90m${moment().tz(tz).format("DD/MM/YY HH:mm:ss")}\x1B[0m`;
 }

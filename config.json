@@ -1,6 +1,6 @@
 {
 	"WhatsaapAccount": {
-		"number": "9779863479066",
+		"number": "",
 		"printQR": false,
 		"sessionFolder": "session",
 		"proxy": null,
@@ -15,15 +15,17 @@
 		"ignoreCommand": []
 	},
 	"adminBot": [
-		"251346368389217"
+		""
 	],
+	"geminiApiKey": "",
+	"mistralApiKey": "",
 	"whiteListMode": {
 		"enable": false,
 		"whiteListIds": [],
 		"notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot (Inbox/DMs)"
 	},
 	"whiteListGroup": {
-		"enable": true,
+		"enable": false,
 		"whiteListThreadIds": [
 			"120363428947271869@g.us"
 		],
@@ -61,7 +63,7 @@
 		"enable": true,
 		"timeInterval": 180,
 		"url": "",
-		"port": 3000,
+		"port": 3001,
 		"notes": "the value of timeInterval is seconds"
 	}
 }

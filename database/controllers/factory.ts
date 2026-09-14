@@ -1,2 +1,67 @@
 // @ts-nocheck
-"use strict";export default function c(t,n){return{createData:async(a,r={})=>{try{return await t.create({[n]:a,...r})}catch(e){return console.error(`Error creating data for ${n}:`,e),null}},getData:async a=>{try{let r=await t.findOne({where:{[n]:a}}).catch(()=>null);return r||(r=await t.findOne({[n]:a}).catch(()=>null)),r}catch(r){return console.error(`Error getting data for ${n}:`,r),null}},setData:async(a,r)=>{try{let e=await t.findOne({where:{[n]:a}}).catch(()=>null);if(e||(e=await t.findOne({[n]:a}).catch(()=>null)),e){if(e.update)return await e.update(r);if(t.updateOne)return await t.updateOne({[n]:a},{$set:r})}return!1}catch(e){return console.error(`Error setting data for ${n}:`,e),!1}},delData:async a=>{try{let r=await t.findOne({where:{[n]:a}}).catch(()=>null);if(r||(r=await t.findOne({[n]:a}).catch(()=>null)),r){if(r.destroy)return await r.destroy();if(t.deleteOne)return await t.deleteOne({[n]:a})}return!1}catch(r){return console.error(`Error deleting data for ${n}:`,r),!1}},getAll:async()=>{try{return t.findAll?await t.findAll():t.find?await t.find({}):[]}catch(a){return console.error("Error getting all data:",a),[]}}}}
+"use strict";
+
+export default function createFactory(model: any, primaryKey: string) {
+    if (!model) return null;
+    const isSequelize = !!model.sequelize;
+
+    return {
+        createData: async (id: any, data: any = {}) => {
+            try {
+                return await model.create({ [primaryKey]: id, ...data });
+            } catch (e) {
+                console.error(`Error creating data for ${primaryKey}:`, e);
+                return null;
+            }
+        },
+        getData: async (id: any) => {
+            try {
+                if (isSequelize) {
+                    return await model.findOne({ where: { [primaryKey]: id } });
+                }
+                return await model.findOne({ [primaryKey]: id });
+            } catch (r) {
+                console.error(`Error getting data for ${primaryKey}:`, r);
+                return null;
+            }
+        },
+        setData: async (id: any, data: any) => {
+            try {
+                if (isSequelize) {
+                    const record = await model.findOne({ where: { [primaryKey]: id } });
+                    if (record) return await record.update(data);
+                    return false;
+                }
+                const res = await model.updateOne({ [primaryKey]: id }, { $set: data });
+                return res.modifiedCount > 0;
+            } catch (e) {
+                console.error(`Error setting data for ${primaryKey}:`, e);
+                return false;
+            }
+        },
+        delData: async (id: any) => {
+            try {
+                if (isSequelize) {
+                    const count = await model.destroy({ where: { [primaryKey]: id } });
+                    return count > 0;
+                }
+                const res = await model.deleteOne({ [primaryKey]: id });
+                return res.deletedCount > 0;
+            } catch (r) {
+                console.error(`Error deleting data for ${primaryKey}:`, r);
+                return false;
+            }
+        },
+        getAll: async () => {
+            try {
+                if (isSequelize) {
+                    return await model.findAll();
+                }
+                return await model.find({});
+            } catch (a) {
+                console.error("Error getting all data:", a);
+                return [];
+            }
+        }
+    };
+}

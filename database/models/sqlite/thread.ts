@@ -1,2 +1,21 @@
 // @ts-nocheck
-"use strict";import{DataTypes as e}from"sequelize";export default function(a){return a.define("Thread",{threadID:{type:e.STRING,primaryKey:!0},name:{type:e.STRING,defaultValue:""},data:{type:e.JSON,defaultValue:{}}})}
+"use strict";
+
+import { DataTypes } from "sequelize";
+
+export default function defineThreadModel(sequelize) {
+  return sequelize.define("Thread", {
+    threadID: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    data: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  });
+}

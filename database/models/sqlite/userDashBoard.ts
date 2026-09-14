@@ -1,2 +1,17 @@
 // @ts-nocheck
-"use strict";import{DataTypes as e}from"sequelize";export default function(a){return a.define("UserDashBoard",{userID:{type:e.STRING,primaryKey:!0},data:{type:e.JSON,defaultValue:{}}})}
+"use strict";
+
+import { DataTypes } from "sequelize";
+
+export default function defineUserDashboardModel(sequelize) {
+  return sequelize.define("UserDashBoard", {
+    userID: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    data: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  });
+}

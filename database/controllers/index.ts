@@ -1,2 +1,26 @@
 // @ts-nocheck
-"use strict";import o from"./users.ts";import e from"./threads.ts";import n from"./global.ts";import a from"./communities.ts";import l from"./channels.ts";import i from"./userDashBoard.ts";export default function t(r){return{Users:o(r.userModel),Threads:e(r.threadModel),Global:n(r.globalModel),Communities:r.communitiesModel?a(r.communitiesModel):null,Channels:r.channelsModel?l(r.channelsModel):null,UserDashBoard:r.dashBoardModel?i(r.dashBoardModel):null}}
+"use strict";
+import usersCtrl from "./users.ts";
+import threadsCtrl from "./threads.ts";
+import globalCtrl from "./global.ts";
+import communitiesCtrl from "./communities.ts";
+import channelsCtrl from "./channels.ts";
+import userDashBoardCtrl from "./userDashBoard.ts";
+
+export default function initControllers(models: any) {
+    return {
+        Users: usersCtrl(models.userModel),
+        Threads: threadsCtrl(models.threadModel),
+        Global: globalCtrl(models.globalModel),
+        Communities: models.communitiesModel ? communitiesCtrl(models.communitiesModel) : null,
+        Channels: models.channelsModel ? channelsCtrl(models.channelsModel) : null,
+        UserDashBoard: models.dashBoardModel ? userDashBoardCtrl(models.dashBoardModel) : null,
+        messageModel: models.messageModel,
+        userModel: models.userModel,
+        threadModel: models.threadModel,
+        globalModel: models.globalModel,
+        communitiesModel: models.communitiesModel,
+        channelsModel: models.channelsModel,
+        dashBoardModel: models.dashBoardModel
+    };
+}

@@ -16,7 +16,7 @@ function getTimePrefix() {
     let tz = "UTC";
     try {
         const config = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, "config.json"), "utf-8"));
-        if (config.timezone) tz = config.timezone;
+        if (config.timeZone || config.timezone) tz = config.timeZone || config.timezone;
     } catch {}
     return `\x1B[90m${moment().tz(tz).format("DD/MM/YY HH:mm:ss")}\x1B[0m`;
 }
@@ -38,7 +38,7 @@ export async function checkDataAndConnectDB() {
         }
         
         const controllers = initControllers(models);
-        global.db = controllers;
+        global.db = Object.assign(global.db || {}, controllers);
         global.models = models;
     } catch (err) {
         console.error(`\x1B[31m  ${getTimePrefix()}  ${global.lang.database.sqliteError(err.message)}\x1B[0m`);

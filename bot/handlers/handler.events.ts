@@ -109,33 +109,60 @@ export default function createEventRouter(sock, message, context) {
                 const role = commandToExecute.role ?? 0;
                 
                 if (role > 0) {
-                    const isAdmin = global.isAdmin(senderJid);
-                    if (role === 1 && !isAdmin) {
+                    const isBotAdmin = global.isAdmin(senderJid) || global.isAdmin(context.senderNumber);
+                    
+                    // role 2: Bot Admin Only
+                    if (role >= 2 && !isBotAdmin) {
                         await context.reply(global.lang.command.adminOnly());
                         return;
                     }
-                    if (role === 2 && !isAdmin) {
+
+                    // role 1: Group Admin (or Bot Admin) in group
+                    if (role === 1) {
                         if (!remoteJid.endsWith("@g.us")) {
                             await context.reply(global.lang.command.groupOnly());
                             return;
                         }
-                        try {
-                            const metadata = await sock.groupMetadata(remoteJid);
-                            const participant = metadata.participants.find(p => p.id === senderJid);
-                            if (!(participant && (participant.admin === "admin" || participant.admin === "superadmin"))) {
-                                await context.reply(global.lang.command.groupAdminOnly());
+                        if (!isBotAdmin) {
+                            try {
+                                const metadata = await sock.groupMetadata(remoteJid);
+                                if (metadata?.participants) {
+                                    for (const p of metadata.participants) {
+                                        if (p.id && p.phoneNumber) {
+                                            const lidClean = (p.id || "").split('@')[0].split(':')[0].replace(/\D/g, '');
+                                            const pnClean = (p.phoneNumber || "").split('@')[0].split(':')[0].replace(/\D/g, '');
+                                            if (lidClean && pnClean && global.lidToPnCache) {
+                                                global.lidToPnCache.set(lidClean, pnClean);
+                                            }
+                                        }
+                                    }
+                                }
+                                const cleanSender = (senderJid || "").split('@')[0].split(':')[0].replace(/\D/g, '');
+                                const resolvedSender = context.senderNumber || (global.resolvePhoneNumber ? global.resolvePhoneNumber(senderJid) : cleanSender);
+
+                                const participant = metadata.participants.find(p => {
+                                    const pIdClean = (p.id || "").split('@')[0].split(':')[0].replace(/\D/g, '');
+                                    const pPnClean = (p.phoneNumber || "").split('@')[0].split(':')[0].replace(/\D/g, '');
+                                    return p.id === senderJid ||
+                                           pIdClean === cleanSender ||
+                                           (resolvedSender && (pIdClean === resolvedSender || pPnClean === resolvedSender));
+                                });
+                                if (!(participant && (participant.admin === "admin" || participant.admin === "superadmin"))) {
+                                    await context.reply(global.lang.command.groupAdminOnly());
+                                    return;
+                                }
+                            } catch (err) {
+                                console.error(global.lang.command.fetchMetaError(), err);
+                                await context.reply(global.lang.command.verifyPermsFailed());
                                 return;
                             }
-                        } catch (err) {
-                            console.error(global.lang.command.fetchMetaError(), err);
-                            await context.reply(global.lang.command.verifyPermsFailed());
-                            return;
                         }
                     }
                 }
 
                 const delay = commandToExecute.countDown || 0;
-                if (delay > 0 && !global.isAdmin(senderJid)) {
+                const isBotAdmin = global.isAdmin(senderJid) || global.isAdmin(context.senderNumber);
+                if (delay > 0 && !isBotAdmin) {
                     const cmdName = commandToExecute.name;
                     if (!cooldowns.has(cmdName)) cooldowns.set(cmdName, new Map());
                     const usersMap = cooldowns.get(cmdName);

@@ -1,3 +1,92 @@
 // @ts-nocheck
-"use strict";import{colors as t}from"../func/colors.ts";import s from"moment-timezone";import fs from"fs";import path from"path";import{fileURLToPath as f}from"url";const _d=path.dirname(f(import.meta.url));function getTz(){try{return JSON.parse(fs.readFileSync(path.join(_d,"../config.json"),"utf-8")).timeZone||"Asia/Kathmandu"}catch{return"Asia/Kathmandu"}}const c="",i=()=>t.gray(s().tz(getTz()).format("HH:mm:ss DD/MM/YYYY"));function $(n,o,...l){o===void 0&&(o=n,n="ERROR"),console.log(`${i()} ${t.redBright(`${c} ${n}:`)}`,o);const r=l;for(let e of r)typeof e=="object"&&!e.stack&&(e=JSON.stringify(e,null,2)),console.log(`${i()} ${t.redBright(`${c} ${n}:`)}`,e)}export default{err:$,error:$,warn:function(n,o){o===void 0&&(o=n,n="WARN"),console.log(`${i()} ${t.yellowBright(`${c} ${n}:`)}`,o)},info:function(n,o){o===void 0&&(o=n,n="INFO"),console.log(`${i()} ${t.greenBright(`${c} ${n}:`)}`,o)},success:function(n,o){o===void 0&&(o=n,n="SUCCES"),console.log(`${i()} ${t.cyanBright(`${c} ${n}:`)}`,o)},master:function(n,o){o===void 0&&(o=n,n="MASTER"),console.log(`${i()} ${t.hex("#eb6734",`${c} ${n}:`)}`,o)},dev:(...n)=>{if(["development","production"].includes("production")!=!1)try{throw new Error}catch(o){const l=o.stack?.split(`
-`)[2];if(l){let r=l.slice(l.indexOf(process.cwd())+process.cwd().length+1);r.endsWith(")")&&(r=r.slice(0,-1)),console.log(`\x1B[36m${r} =>\x1B[0m`,...n)}else console.log("\x1B[36mdev =>\x1B[0m",...n)}}};
+"use strict";
+
+import { colors } from "../func/colors.ts";
+import moment from "moment-timezone";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function getTimezone() {
+  try {
+    const configPath = path.join(__dirname, "../config.json");
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    return config.timeZone || config.timezone || "Asia/Kathmandu";
+  } catch {
+    return "Asia/Kathmandu";
+  }
+}
+
+const getTimestamp = () => {
+  return colors.gray(moment().tz(getTimezone()).format("HH:mm:ss DD/MM/YYYY"));
+};
+
+function logError(title, message, ...rest) {
+  if (message === undefined) {
+    message = title;
+    title = "ERROR";
+  }
+  console.log(`${getTimestamp()} ${colors.redBright(`${title}:`)}`, message);
+  for (let item of rest) {
+    if (typeof item === "object" && !item.stack) {
+      item = JSON.stringify(item, null, 2);
+    }
+    console.log(`${getTimestamp()} ${colors.redBright(`${title}:`)}`, item);
+  }
+}
+
+export default {
+  err: logError,
+  error: logError,
+
+  warn(title, message) {
+    if (message === undefined) {
+      message = title;
+      title = "WARN";
+    }
+    console.log(`${getTimestamp()} ${colors.yellowBright(`${title}:`)}`, message);
+  },
+
+  info(title, message) {
+    if (message === undefined) {
+      message = title;
+      title = "INFO";
+    }
+    console.log(`${getTimestamp()} ${colors.greenBright(`${title}:`)}`, message);
+  },
+
+  success(title, message) {
+    if (message === undefined) {
+      message = title;
+      title = "SUCCESS";
+    }
+    console.log(`${getTimestamp()} ${colors.cyanBright(`${title}:`)}`, message);
+  },
+
+  master(title, message) {
+    if (message === undefined) {
+      message = title;
+      title = "MASTER";
+    }
+    console.log(`${getTimestamp()} ${colors.hex("#eb6734", `${title}:`)}`, message);
+  },
+
+  dev(...args) {
+    try {
+      throw new Error();
+    } catch (err) {
+      const callerLine = err.stack?.split("\n")[2];
+      if (callerLine) {
+        let location = callerLine.slice(callerLine.indexOf(process.cwd()) + process.cwd().length + 1);
+        if (location.endsWith(")")) {
+          location = location.slice(0, -1);
+        }
+        console.log(`\x1B[36m${location} =>\x1B[0m`, ...args);
+      } else {
+        console.log("\x1B[36mdev =>\x1B[0m", ...args);
+      }
+    }
+  },
+};

@@ -1,2 +1,21 @@
 // @ts-nocheck
-"use strict";import{DataTypes as e}from"sequelize";export default function(t){return t.define("Communities",{communityID:{type:e.STRING,primaryKey:!0},name:{type:e.STRING,defaultValue:""},data:{type:e.JSON,defaultValue:{}}})}
+"use strict";
+
+import { DataTypes } from "sequelize";
+
+export default function defineCommunitiesModel(sequelize) {
+  return sequelize.define("Communities", {
+    communityID: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    data: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  });
+}

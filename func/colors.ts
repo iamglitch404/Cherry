@@ -1,2 +1,110 @@
 // @ts-nocheck
-"use strict";export const isHexColor=n=>n?.match?.(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);const i={bold:n=>`\x1B[1m${n}\x1B[0m`,italic:n=>`\x1B[3m${n}\x1B[0m`,underline:n=>`\x1B[4m${n}\x1B[0m`,strikethrough:n=>`\x1B[9m${n}\x1B[0m`,blink:n=>`\x1B[5m${n}\x1B[0m`,inverse:n=>`\x1B[7m${n}\x1B[0m`,hidden:n=>`\x1B[8m${n}\x1B[0m`,black:n=>`\x1B[30m${n}\x1B[0m`,blue:n=>`\x1B[34m${n}\x1B[0m`,blueBright:n=>`\x1B[94m${n}\x1B[0m`,cyan:n=>`\x1B[36m${n}\x1B[0m`,cyanBright:n=>`\x1B[96m${n}\x1B[0m`,default:n=>n,gray:n=>`\x1B[90m${n}\x1B[0m`,green:n=>`\x1B[32m${n}\x1B[0m`,greenBright:n=>`\x1B[92m${n}\x1B[0m`,grey:n=>`\x1B[90m${n}\x1B[0m`,magenta:n=>`\x1B[35m${n}\x1B[0m`,red:n=>`\x1B[31m${n}\x1B[0m`,redBright:n=>`\x1B[91m${n}\x1B[0m`,reset:n=>n,white:n=>`\x1B[37m${n}\x1B[0m`,yellow:n=>`\x1B[33m${n}\x1B[0m`,yellowBright:n=>`\x1B[93m${n}\x1B[0m`,hex:function(n,b){return isHexColor(b)&&([n,b]=[b,n]),b?`\x1B[38;2;${parseInt(n.slice(1,3),16)};${parseInt(n.slice(3,5),16)};${parseInt(n.slice(5,7),16)}m${b}\x1B[0m`:isHexColor(n)?function(s){return`\x1B[38;2;${parseInt(n.slice(1,3),16)};${parseInt(n.slice(3,5),16)};${parseInt(n.slice(5,7),16)}m${s}\x1B[0m`}:function(s){return`\x1B[38;2;${parseInt(s.slice(1,3),16)};${parseInt(s.slice(3,5),16)};${parseInt(s.slice(5,7),16)}m${n}\x1B[0m`}},bgBlack:n=>`\x1B[40m${n}\x1B[0m`,bgBlue:n=>`\x1B[44m${n}\x1B[0m`,bgCyan:n=>`\x1B[46m${n}\x1B[0m`,bgGray:n=>`\x1B[100m${n}\x1B[0m`,bgGreen:n=>`\x1B[42m${n}\x1B[0m`,bgGrey:n=>`\x1B[100m${n}\x1B[0m`,bgMagenta:n=>`\x1B[45m${n}\x1B[0m`,bgRed:n=>`\x1B[41m${n}\x1B[0m`,bgWhite:n=>`\x1B[47m${n}\x1B[0m`,bgYellow:n=>`\x1B[43m${n}\x1B[0m`,bgHex:function(n,b){return isHexColor(b)&&([n,b]=[b,n]),b?`\x1B[48;2;${parseInt(n.slice(1,3),16)};${parseInt(n.slice(3,5),16)};${parseInt(n.slice(5,7),16)}m${b}\x1B[0m`:isHexColor(n)?s=>`\x1B[48;2;${parseInt(n.slice(1,3),16)};${parseInt(n.slice(3,5),16)};${parseInt(n.slice(5,7),16)}m${s}\x1B[0m`:s=>`\x1B[48;2;${parseInt(s.slice(1,3),16)};${parseInt(s.slice(3,5),16)};${parseInt(s.slice(5,7),16)}m${n}\x1B[0m`}};export const colors={};colors.bold={};for(const n in i)n!=="bold"&&(colors[n]=i[n],colors[n].bold=(b,s)=>i.bold(i[n](b,s)),colors.bold[n]=(b,s)=>i.bold(i[n](b,s)));export default{isHexColor,colors};
+"use strict";
+
+export const isHexColor = (str) => {
+  return typeof str === "string" && /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(str);
+};
+
+const ansiCodes = {
+  // Styles
+  bold: (text) => `\x1B[1m${text}\x1B[0m`,
+  italic: (text) => `\x1B[3m${text}\x1B[0m`,
+  underline: (text) => `\x1B[4m${text}\x1B[0m`,
+  strikethrough: (text) => `\x1B[9m${text}\x1B[0m`,
+  blink: (text) => `\x1B[5m${text}\x1B[0m`,
+  inverse: (text) => `\x1B[7m${text}\x1B[0m`,
+  hidden: (text) => `\x1B[8m${text}\x1B[0m`,
+  reset: (text) => text,
+  default: (text) => text,
+
+  // Text Colors
+  black: (text) => `\x1B[30m${text}\x1B[0m`,
+  red: (text) => `\x1B[31m${text}\x1B[0m`,
+  green: (text) => `\x1B[32m${text}\x1B[0m`,
+  yellow: (text) => `\x1B[33m${text}\x1B[0m`,
+  blue: (text) => `\x1B[34m${text}\x1B[0m`,
+  magenta: (text) => `\x1B[35m${text}\x1B[0m`,
+  cyan: (text) => `\x1B[36m${text}\x1B[0m`,
+  white: (text) => `\x1B[37m${text}\x1B[0m`,
+  gray: (text) => `\x1B[90m${text}\x1B[0m`,
+  grey: (text) => `\x1B[90m${text}\x1B[0m`,
+
+  // Bright Text Colors
+  redBright: (text) => `\x1B[91m${text}\x1B[0m`,
+  greenBright: (text) => `\x1B[92m${text}\x1B[0m`,
+  yellowBright: (text) => `\x1B[93m${text}\x1B[0m`,
+  blueBright: (text) => `\x1B[94m${text}\x1B[0m`,
+  cyanBright: (text) => `\x1B[96m${text}\x1B[0m`,
+
+  // Background Colors
+  bgBlack: (text) => `\x1B[40m${text}\x1B[0m`,
+  bgRed: (text) => `\x1B[41m${text}\x1B[0m`,
+  bgGreen: (text) => `\x1B[42m${text}\x1B[0m`,
+  bgYellow: (text) => `\x1B[43m${text}\x1B[0m`,
+  bgBlue: (text) => `\x1B[44m${text}\x1B[0m`,
+  bgMagenta: (text) => `\x1B[45m${text}\x1B[0m`,
+  bgCyan: (text) => `\x1B[46m${text}\x1B[0m`,
+  bgWhite: (text) => `\x1B[47m${text}\x1B[0m`,
+  bgGray: (text) => `\x1B[100m${text}\x1B[0m`,
+  bgGrey: (text) => `\x1B[100m${text}\x1B[0m`,
+
+  // 24-bit TrueColor Hex support
+  hex(hexCode, text) {
+    if (isHexColor(text)) {
+      [hexCode, text] = [text, hexCode];
+    }
+    const parse = (hex) => [
+      parseInt(hex.slice(1, 3), 16),
+      parseInt(hex.slice(3, 5), 16),
+      parseInt(hex.slice(5, 7), 16),
+    ];
+
+    if (text) {
+      const [r, g, b] = parse(hexCode);
+      return `\x1B[38;2;${r};${g};${b}m${text}\x1B[0m`;
+    }
+
+    if (isHexColor(hexCode)) {
+      const [r, g, b] = parse(hexCode);
+      return (str) => `\x1B[38;2;${r};${g};${b}m${str}\x1B[0m`;
+    }
+
+    return (str) => `\x1B[38;2;${parse(str).join(";")}m${hexCode}\x1B[0m`;
+  },
+
+  bgHex(hexCode, text) {
+    if (isHexColor(text)) {
+      [hexCode, text] = [text, hexCode];
+    }
+    const parse = (hex) => [
+      parseInt(hex.slice(1, 3), 16),
+      parseInt(hex.slice(3, 5), 16),
+      parseInt(hex.slice(5, 7), 16),
+    ];
+
+    if (text) {
+      const [r, g, b] = parse(hexCode);
+      return `\x1B[48;2;${r};${g};${b}m${text}\x1B[0m`;
+    }
+
+    if (isHexColor(hexCode)) {
+      const [r, g, b] = parse(hexCode);
+      return (str) => `\x1B[48;2;${r};${g};${b}m${str}\x1B[0m`;
+    }
+
+    return (str) => `\x1B[48;2;${parse(str).join(";")}m${hexCode}\x1B[0m`;
+  },
+};
+
+export const colors = {};
+colors.bold = {};
+
+for (const name in ansiCodes) {
+  if (name !== "bold") {
+    colors[name] = ansiCodes[name];
+    colors[name].bold = (text, extra) => ansiCodes.bold(ansiCodes[name](text, extra));
+    colors.bold[name] = (text, extra) => ansiCodes.bold(ansiCodes[name](text, extra));
+  }
+}
+
+export default { isHexColor, colors };

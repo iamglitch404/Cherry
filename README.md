@@ -149,4 +149,11 @@ The `context` object passed to `onStart` provides extremely helpful utilities:
 ---
 
 ## 📜 License & Copyright
-**Copyright:** Project Cherry Bot created by Yugant (Yugant Xettri). Please do not sell this source code or claim it as your own. Enjoy the absolute freedom!
+
+Cherry is free and open source (MIT). Made by **Yugant Xettri**.
+
+Use it, fork it, change it, host it — all fine, even commercially. Just keep my
+name on it. Don't strip the credit and don't pretend you wrote the whole thing.
+
+See [`LICENSE`](LICENSE) for the full text, and [`NOTICE.md`](NOTICE.md) for the
+short version.

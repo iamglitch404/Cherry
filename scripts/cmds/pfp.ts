@@ -1,109 +1,103 @@
 // @ts-nocheck
 "use strict";
-const timeout = (a) =>
-    new Promise((r, s) => setTimeout(() => s(new Error("Timeout")), a)),
-  queryProfilePictureUrl = async (a, r, s) => {
-    const p = r.split("@")[1] || "s.whatsapp.net",
-      u = a.query({
-        tag: "iq",
-        attrs: { target: r, to: p, type: "get", xmlns: "w:profile:picture" },
-        content: [{ tag: "picture", attrs: { type: s, query: "url" } }],
-      }),
-      f = await Promise.race([u, timeout(5e3)]);
-    return (
-      (Array.isArray(f.content)
-        ? f.content.find((i) => i.tag === "picture")
-        : null
-      )?.attrs?.url || null
-    );
-  };
-createCommand({
+
+const timeout = (ms) =>
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms));
+
+async function queryProfilePictureUrl(sock, jid, type) {
+  const domain = jid.split("@")[1] || "s.whatsapp.net";
+  const queryPromise = sock.query({
+    tag: "iq",
+    attrs: { target: jid, to: domain, type: "get", xmlns: "w:profile:picture" },
+    content: [{ tag: "picture", attrs: { type, query: "url" } }],
+  });
+
+  const response = await Promise.race([queryPromise, timeout(5000)]);
+  if (Array.isArray(response?.content)) {
+    const pictureNode = response.content.find((item) => item.tag === "picture");
+    return pictureNode?.attrs?.url || null;
+  }
+  return null;
+}
+
+commandintro({
   name: "pfp",
   author: "Yugant Xettri",
   aliases: ["profile", "avatar"],
-  prefix: !0,
-  onStart: async (a, r, { args: s, senderJid: p, remoteJid: u, reply: f }) => {
-    let e = p;
-    const i =
-      r.message?.extendedTextMessage?.contextInfo ||
-      r.message?.imageMessage?.contextInfo ||
-      r.message?.videoMessage?.contextInfo ||
-      r.message?.documentMessage?.contextInfo;
-    i?.quotedMessage && (e = i.participant || i.quotedMessage.participant || p);
-    const g = i?.mentionedJid && i.mentionedJid.length > 0;
-    if ((g && (e = i.mentionedJid[0]), !g && s && s.length > 0)) {
-      const t = s.join(" "),
-        c = t.replace(/\D/g, "");
-      c.length >= 7 &&
-        (t.includes("lid") ? (e = `${c}@lid`) : (e = `${c}@s.whatsapp.net`));
+  role: 0,
+  onStart: async (sock, msg, { args, senderJid, remoteJid, reply }) => {
+    let targetJid = senderJid;
+    const contextInfo =
+      msg.message?.extendedTextMessage?.contextInfo ||
+      msg.message?.imageMessage?.contextInfo ||
+      msg.message?.videoMessage?.contextInfo ||
+      msg.message?.documentMessage?.contextInfo;
+
+    // Check quoted message first
+    if (contextInfo?.quotedMessage) {
+      targetJid = contextInfo.participant || senderJid;
     }
-    console.log(`[Command] pfp initiated by ${p.split("@")[0]} targeting ${e}`);
-    try {
-      let t = null;
-      const c = async (l) => {
-        try {
-          console.log(
-            `[PFP] Fetching high-res image for ${l.split("@")[0]}...`,
-          );
-          const n = await queryProfilePictureUrl(a, l, "image");
-          if (n) return n;
-          throw new Error("No URL in response");
-        } catch (n) {
-          console.log(
-            `[PFP] High-res failed for ${l.split("@")[0]}: ${n.message || n}. Trying preview...`,
-          );
-          try {
-            const o = await queryProfilePictureUrl(a, l, "preview");
-            if (o) return o;
-          } catch {}
-          console.log(
-            "[PFP] Manual IQ failed, trying native profilePictureUrl...",
-          );
-          try {
-            const o = await a.profilePictureUrl(l, "image");
-            if (o) return o;
-          } catch {}
-          throw new Error("No URL returned from any method");
-        }
-      };
-      try {
-        t = await c(e);
-      } catch (l) {
-        if (e.endsWith("@s.whatsapp.net")) {
-          const n = e.replace("@s.whatsapp.net", "@lid");
-          console.log(
-            `[PFP] Failed for standard JID, trying LID fallback: ${n}`,
-          );
-          try {
-            ((t = await c(n)), (e = n));
-          } catch (o) {
-            throw o;
-          }
-        } else throw l;
+
+    // Check mentions
+    const mentions = contextInfo?.mentionedJid || [];
+    if (mentions.length > 0) {
+      targetJid = mentions[0];
+    } else if (args.length > 0) {
+      const rawText = args.join(" ");
+      const digits = rawText.replace(/\D/g, "");
+      if (digits.length >= 7) {
+        targetJid = rawText.includes("lid") ? `${digits}@lid` : `${digits}@s.whatsapp.net`;
       }
-      if (!t)
-        throw new Error("No profile picture URL returned after all attempts");
-      (await a.sendMessage(
-        u,
+    }
+
+    async function fetchPfpUrl(jid) {
+      try {
+        const highRes = await queryProfilePictureUrl(sock, jid, "image");
+        if (highRes) return highRes;
+      } catch {}
+
+      try {
+        const preview = await queryProfilePictureUrl(sock, jid, "preview");
+        if (preview) return preview;
+      } catch {}
+
+      try {
+        const native = await sock.profilePictureUrl(jid, "image");
+        if (native) return native;
+      } catch {}
+
+      return null;
+    }
+
+    try {
+      let pfpUrl = await fetchPfpUrl(targetJid);
+
+      if (!pfpUrl && targetJid.endsWith("@s.whatsapp.net")) {
+        const fallbackLid = targetJid.replace("@s.whatsapp.net", "@lid");
+        pfpUrl = await fetchPfpUrl(fallbackLid);
+        if (pfpUrl) targetJid = fallbackLid;
+      }
+
+      if (!pfpUrl) {
+        throw new Error("No profile picture found");
+      }
+
+      const targetNumber = targetJid.split("@")[0];
+      await sock.sendMessage(
+        remoteJid,
         {
-          image: { url: t },
-          caption: `Profile picture of @${e.split("@")[0]}`,
+          image: { url: pfpUrl },
+          caption: `📸 Profile picture of @${targetNumber}`,
+          mentions: [targetJid],
         },
-        { quoted: r, mentions: [e] },
-      ),
-        console.log(
-          `[Command] Successfully sent profile picture of ${e.split("@")[0]} to ${u}`,
-        ));
-    } catch (t) {
-      (console.error(
-        `[Command] Failed to retrieve profile picture for ${e.split("@")[0]}:`,
-        t.message || t,
-      ),
-        await f(
-          `Failed to retrieve profile picture for @${e.split("@")[0]}. The user may not have a profile picture set, or their privacy settings prevent viewing it.`,
-          { mentions: [e] },
-        ),
-        console.log(`[Command] Sent fallback error reply to ${u}`));
+        { quoted: msg }
+      );
+    } catch (err) {
+      const targetNumber = targetJid.split("@")[0];
+      await reply(
+        `❌ Could not retrieve profile picture for @${targetNumber}. The user may not have a profile picture set or their privacy settings prevent viewing it.`,
+        { mentions: [targetJid] }
+      );
     }
   },
 });

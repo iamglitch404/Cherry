@@ -1,19 +1,21 @@
 // @ts-nocheck
 "use strict";
-createCommand({
+
+commandintro({
   name: "jid",
   author: "Yugant Xettri",
   aliases: ["myjid", "chatjid"],
-  prefix: !0,
-  onStart: async (i, u, { reply: s, remoteJid: a, senderJid: n }) => {
-    if (a?.endsWith("@g.us")) {
-      let e = "Unknown";
+  role: 0,
+  onStart: async (sock, msg, { reply, remoteJid, senderJid }) => {
+    if (remoteJid?.endsWith("@g.us")) {
+      let groupName = "Unknown Group";
       try {
-        const t = await i.groupMetadata(a);
-        t?.subject && (e = t.subject);
+        const metadata = await sock.groupMetadata(remoteJid);
+        if (metadata?.subject) groupName = metadata.subject;
       } catch {}
-      await s(`Group Name: ${e}
-JID: \`${a}\``);
-    } else await s(`Your JID: \`${n}\``);
+      await reply(`*Group:* ${groupName}\n*JID:* \`${remoteJid}\``);
+    } else {
+      await reply(`*Your JID:* \`${senderJid}\``);
+    }
   },
 });

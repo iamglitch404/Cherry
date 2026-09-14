@@ -1,2 +1,26 @@
 // @ts-nocheck
-"use strict";import{DataTypes as e}from"sequelize";export default function(a){return a.define("Message",{messageID:{type:e.STRING,primaryKey:!0},senderID:{type:e.STRING},threadID:{type:e.STRING},timestamp:{type:e.STRING},messageData:{type:e.JSON,defaultValue:{}}})}
+"use strict";
+
+import { DataTypes } from "sequelize";
+
+export default function defineMessageModel(sequelize) {
+  return sequelize.define("Message", {
+    messageID: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    senderID: {
+      type: DataTypes.STRING,
+    },
+    threadID: {
+      type: DataTypes.STRING,
+    },
+    timestamp: {
+      type: DataTypes.STRING,
+    },
+    messageData: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  });
+}

@@ -88,20 +88,13 @@ export function printBootLogo() {
     const title = `Cherry Bot @${packageJson.version} - A simple WhatsApp bot`;
     printCentered(gradient("#9F98E8", "#AFF6CF")(title), title.length);
     
-    const subtitle1 = "Created by Yugant Xettri with \u2661";
-    const subtitle2 = "Enjoy the absolute freedom";
-    const warning = "ALL VERSIONS NOT RELEASED BY YUGANT ARE FAKE";
-    
+    const subtitle1 = "Created by Yugant Xettri";
+    const subtitle2 = "A fast, modular WhatsApp bot built with Baileys";
+
     printCentered(gradient("#9F98E8", "#AFF6CF")(subtitle1), subtitle1.length);
     printCentered(gradient("#9F98E8", "#AFF6CF")(subtitle2), subtitle2.length);
-    printCentered(gradient("#f5af19", "#f12711")(warning), warning.length);
-    
-    const copyrightMsg = "COPYRIGHT: Project Cherry Bot created by Yugant (Yugant Xettri), please do not sell this source code or claim it as your own. Thank you!";
-    const copyrightPadding = Math.floor((termWidth - copyrightMsg.length) / 2);
-    const copyrightPadded = " ".repeat(Math.max(0, copyrightPadding)) + `\x1B[1m\x1B[33mCOPYRIGHT:\x1B[0m \x1B[1m\x1B[36mProject Cherry Bot created by Yugant (Yugant Xettri), please do not sell this source code or claim it as your own. Thank you!\x1B[0m`;
-    
-    console.log(copyrightPadded);
-    console.log(gradient("#f5af19", "#f12711")(getCenteredLine(null, true)));
+
+    console.log(gradient("#FA8BFF", "#2BD2FF")(getCenteredLine(null, true)));
     hasBooted = true;
 }
 
@@ -112,7 +105,7 @@ export async function loginToWhatsApp() {
     let tz = "UTC";
     try {
         const configJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../../config.json"), "utf-8"));
-        if (configJson.timezone) tz = configJson.timezone;
+        if (configJson.timeZone || configJson.timezone) tz = configJson.timeZone || configJson.timezone;
     } catch {}
     
     const { state, saveCreds } = await getSession(config.sessionFolder);
@@ -132,11 +125,12 @@ export async function loginToWhatsApp() {
         sock.ev.on("connection.update", async (update) => {
             const { connection, lastDisconnect, qr } = update;
             
-            if (qr) {
+            if (qr && config.printQR !== false) {
                 global.qrcode.generate(qr, { small: true }, () => {});
             }
             
             if (connection === "close") {
+                resolve(null);
                 global.handleReconnect(lastDisconnect);
             } else if (connection === "open") {
                 const msgStr = (global as any).lang?.connection?.success() || "✓ Connected to WhatsApp!";
@@ -168,36 +162,18 @@ export async function loginToWhatsApp() {
                     if (getRetryAttempts() === 0) {
                         printLoginInfo({ timeStr, dateStr, formattedNum });
                     }
-                } else if (sock.authState.creds.pairingCode) {
-                    printLoginInfo({ timeStr, dateStr, formattedNum, code: sock.authState.creds.pairingCode });
-                } else if (getRetryAttempts() === 0 && !hasPrintedLogin) {
+                } else if (!hasPrintedLogin) {
                     hasPrintedLogin = true;
-                    (async () => {
-                        await new Promise((res) => {
-                            if (sock.ws?.readyState === 1) return res();
-                            const interval = setInterval(() => {
-                                if (sock.ws?.readyState === 1) {
-                                    clearInterval(interval);
-                                    res();
-                                }
-                            }, 500);
-                            setTimeout(() => {
-                                clearInterval(interval);
-                                res();
-                            }, 10000); // 10s fallback
-                        });
-                        
-                        setTimeout(async () => {
-                            if (!sock.authState.creds.registered) {
-                                try {
-                                    const code = await sock.requestPairingCode(cleanNum);
-                                    printLoginInfo({ timeStr, dateStr, formattedNum, code });
-                                } catch (err) {
-                                    console.error(`  \x1B[90m${dateStr} ${timeStr}\x1B[0m  \x1B[31m[System] Failed to request pairing code.\x1B[0m`);
-                                }
+                    setTimeout(async () => {
+                        if (!sock.authState.creds.registered) {
+                            try {
+                                const code = await sock.requestPairingCode(cleanNum);
+                                printLoginInfo({ timeStr, dateStr, formattedNum, code });
+                            } catch (err) {
+                                console.error(`  \x1B[90m${dateStr} ${timeStr}\x1B[0m  \x1B[31m[System] Failed to request pairing code: ${err?.message || err}\x1B[0m`);
                             }
-                        }, 3000);
-                    })();
+                        }
+                    }, 2000);
                 }
             } else {
                 const timePrefix = `\x1B[90m${moment().tz(tz).format("DD/MM/YY HH:mm:ss")}\x1B[0m`;

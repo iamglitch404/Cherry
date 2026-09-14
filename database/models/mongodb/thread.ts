@@ -1,2 +1,25 @@
 // @ts-nocheck
-"use strict";import e from"mongoose";const t=new e.Schema({threadID:{type:String,required:!0,unique:!0},name:{type:String,default:""},data:{type:e.Schema.Types.Mixed,default:{}}},{timestamps:!0});export default e.model("Thread",t);
+"use strict";
+
+import mongoose from "mongoose";
+
+const threadSchema = new mongoose.Schema(
+  {
+    threadID: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      default: "",
+    },
+    data: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Thread", threadSchema);

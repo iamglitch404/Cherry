@@ -1,15 +1,28 @@
 {
-  "name": "whatsapp-bot",
+  "name": "cherry",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Cherry Bot — a free & open-source multi-device WhatsApp bot by Yugant Xettri.",
+  "main": "index.ts",
   "scripts": {
-    "start": "tsx index.ts",
+    "start": "node index.ts",
+    "dev": "node --watch index.ts",
+    "start:tsx": "tsx index.ts",
+    "dev:tsx": "tsx watch index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "baileys",
+    "cherry",
+    "cherry-bot"
+  ],
+  "author": "Yugant Xettri",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yugant-Xettri/Cherry-V2.git"
+  },
   "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

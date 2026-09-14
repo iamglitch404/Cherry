@@ -1,334 +1,294 @@
 // @ts-nocheck
 "use strict";
+
+import { execFile } from "child_process";
+import { promisify } from "util";
+import fs from "fs";
+import path from "path";
+import os from "os";
+
+const execFileAsync = promisify(execFile);
 const searchSessions = new Map();
-async function ytSearch(u, m = 5) {
-  const o = `https://www.youtube.com/results?search_query=${encodeURIComponent(u)}&sp=EgIQAQ%253D%253D`;
+
+function isYouTubeUrl(text) {
+  return /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i.test(text);
+}
+
+function extractVideoId(text) {
+  const match = text.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  return match ? match[1] : null;
+}
+
+async function searchYouTube(query, limit = 6) {
   try {
-    const h = (
-      await (
-        await fetch(o, {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept-Language": "en-US,en;q=0.9",
-          },
-        })
-      ).text()
-    ).match(/var ytInitialData\s*=\s*({.+?});/);
-    if (!h || !h[1]) return [];
-    const n =
-        JSON.parse(h[1]).contents?.twoColumnSearchResultsRenderer
-          ?.primaryContents?.sectionListRenderer?.contents?.[0]
-          ?.itemSectionRenderer?.contents || [],
-      t = [];
-    for (const r of n) {
-      if (t.length >= m) break;
-      const e = r.videoRenderer;
-      if (!e) continue;
-      let s = !1;
-      if (e.thumbnailOverlays) {
-        for (const d of e.thumbnailOverlays)
-          if (d.thumbnailOverlayTimeStatusRenderer?.style === "SHORTS") {
-            s = !0;
-            break;
-          }
-      }
-      if (
-        ((e.title?.runs?.[0]?.text || "").toLowerCase().includes("#shorts") &&
-          (s = !0),
-        s)
-      )
-        continue;
-      const w = e.videoId,
-        g = e.title?.runs?.[0]?.text,
-        f = e.lengthText?.simpleText || "?:??",
-        i = e.ownerText?.runs?.[0]?.text || "Unknown",
-        y = e.shortViewCountText?.simpleText || "";
-      w &&
-        g &&
-        t.push({
-          id: w,
-          title: g,
-          duration: f,
-          author: i,
-          views: y,
-          url: `https://www.youtube.com/watch?v=${w}`,
-        });
-    }
-    return t;
-  } catch (c) {
-    return (console.error("[YouTube] Parsing search results failed:", c), []);
+    const { stdout } = await execFileAsync("yt-dlp", [
+      `ytsearch${limit}:${query}`,
+      "--print",
+      "%(id)s\t%(title)s\t%(duration_string)s\t%(channel)s",
+      "--no-warnings",
+      "--flat-playlist",
+    ]);
+
+    const lines = stdout.trim().split("\n").filter(Boolean);
+    return lines.map((line) => {
+      const [id, title, duration, channel] = line.split("\t");
+      return {
+        id,
+        title: title || "Unknown Title",
+        duration: duration || "?:??",
+        channel: channel || "Unknown",
+        url: `https://www.youtube.com/watch?v=${id}`,
+      };
+    });
+  } catch (err) {
+    console.error("[YouTube/yt-dlp] Search error:", err);
+    return [];
   }
 }
-async function fetchYouTubeMediaDetails(u, m) {
-  const o = await fetch(`${u}?url=${encodeURIComponent(m)}`);
-  if (!o.ok) throw new Error(`API returned status ${o.status}`);
-  return await o.json();
-}
-async function downloadMediaInChunks(u, m) {
-  const o = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    Accept: "*/*",
-    Connection: "keep-alive",
-  };
-  let c = m;
-  if (!c)
-    try {
-      const n = (
-        await fetch(u, { headers: { ...o, Range: "bytes=0-0" } })
-      ).headers.get("content-range");
-      if (n) {
-        const t = n.match(/\/(\d+)$/);
-        t && t[1] && (c = parseInt(t[1]));
-      }
-    } catch (a) {
-      console.error(
-        "[YouTube] Failed to fetch content-length for chunking:",
-        a,
-      );
-    }
-  if (!c) {
-    const a = await fetch(u, { headers: { ...o, Connection: "close" } });
-    if (!a.ok) throw new Error(`Fallback fetch failed: ${a.status}`);
-    return Buffer.from(await a.arrayBuffer());
-  }
-  const p = 1.5 * 1024 * 1024,
-    h = [];
-  for (let a = 0; a < c; a += p) {
-    const n = Math.min(a + p - 1, c - 1),
-      t = (async () => {
-        for (let r = 1; r <= 3; r++) {
-          try {
-            const e = await fetch(u, {
-              headers: { ...o, Range: `bytes=${a}-${n}` },
-            });
-            if (e.ok) {
-              if (e.status === 200)
-                throw new Error(
-                  "Server returned 200 OK (ignored Range header). Chunking unsupported.",
-                );
-              return Buffer.from(await e.arrayBuffer());
-            }
-          } catch (e) {
-            if (r === 3) throw e;
-          }
-          await new Promise((e) => setTimeout(e, 1e3));
-        }
-        throw new Error(`Failed to download chunk ${a}-${n}`);
-      })();
-    h.push(t);
-  }
+
+async function getVideoDetails(videoUrl) {
   try {
-    const a = await Promise.all(h);
-    return Buffer.concat(a);
-  } catch (a) {
-    console.warn(
-      `[YouTube] Chunked download failed (${a}), falling back to single stream download...`,
-    );
-    const n = await fetch(u, { headers: { ...o, Connection: "close" } });
-    if (!n.ok) throw new Error(`Fallback fetch failed: ${n.status}`);
-    return Buffer.from(await n.arrayBuffer());
+    const { stdout } = await execFileAsync("yt-dlp", [
+      videoUrl,
+      "--print",
+      "%(id)s\t%(title)s\t%(duration_string)s\t%(channel)s",
+      "--no-warnings",
+    ]);
+
+    const [id, title, duration, channel] = stdout.trim().split("\t");
+    return {
+      id,
+      title: title || "YouTube Video",
+      duration: duration || "?:??",
+      channel: channel || "Unknown",
+      url: `https://www.youtube.com/watch?v=${id}`,
+    };
+  } catch (err) {
+    console.error("[YouTube/yt-dlp] Details error:", err);
+    return null;
   }
 }
-createCommand({
+
+async function downloadAudio(videoId) {
+  const outputPath = path.join(os.tmpdir(), `cherry_audio_${videoId}_${Date.now()}.mp3`);
+
+  await execFileAsync("yt-dlp", [
+    "-x",
+    "--audio-format", "mp3",
+    "--audio-quality", "0",
+    "--max-filesize", "60M",
+    "-o", outputPath,
+    `https://www.youtube.com/watch?v=${videoId}`,
+  ]);
+
+  const fileBuffer = await fs.promises.readFile(outputPath);
+  await fs.promises.unlink(outputPath).catch(() => {});
+  return fileBuffer;
+}
+
+async function downloadVideo(videoId) {
+  const outputPath = path.join(os.tmpdir(), `cherry_video_${videoId}_${Date.now()}.mp4`);
+
+  await execFileAsync("yt-dlp", [
+    "-f", "bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/bv*[height<=720]+ba/b",
+    "--merge-output-format", "mp4",
+    "--max-filesize", "70M",
+    "-o", outputPath,
+    `https://www.youtube.com/watch?v=${videoId}`,
+  ]);
+
+  const fileBuffer = await fs.promises.readFile(outputPath);
+  await fs.promises.unlink(outputPath).catch(() => {});
+  return fileBuffer;
+}
+
+commandintro({
   name: "youtube",
   author: "Yugant Xettri",
-  aliases: ["yt", "play"],
-  prefix: !0,
-  onStart: async (u, m, { reply: o, react: c, args: p, senderJid: h }) => {
-    const a = p.join(" ").trim();
-    if (!a) {
-      await o(`\u{1F4A1} Usage: *-youtube <song or video name>*
-Example: *-youtube Shape of You*`);
+  aliases: ["yt", "play", "ytdl"],
+  role: 0,
+  onStart: async (sock, msg, { reply, react, args, senderJid }) => {
+    const input = args.join(" ").trim();
+    if (!input) {
+      await reply(
+        "💡 *YouTube Downloader*\n\n" +
+        "• Search: `-youtube <song or video name>`\n" +
+        "• Direct Link: `-youtube https://youtu.be/...`\n" +
+        "• Aliases: `yt`, `play`, `ytdl`"
+      );
       return;
     }
-    await c("\u{1F50D}");
-    try {
-      const n = await ytSearch(a, 6);
-      if (!n.length) {
-        await o(`\u274C No results found for: _${a}_`);
+
+    // Direct YouTube link handling
+    if (isYouTubeUrl(input)) {
+      await react("🔍");
+      const videoId = extractVideoId(input);
+      const details = await getVideoDetails(`https://www.youtube.com/watch?v=${videoId}`);
+
+      if (!details) {
+        await reply("❌ Could not fetch information for this YouTube video.");
         return;
       }
-      let t = `\u{1F50E} Results for *"${a}"* on YouTube
 
-`;
-      (n.forEach((e, s) => {
-        t += `\`[${s + 1}]\` ${e.title} \u2014 ${e.author} (${e.duration})
-`;
-      }),
-        (t += `
-\u{1F3A7} Reply with *1\u2013${n.length}* to select the video.`));
-      const r = await o(t);
-      (r?.key?.id &&
-        (searchSessions.set(r.key.id, {
+      const menu =
+        `🎥 *${details.title}*\n` +
+        `👤 Channel: ${details.channel}\n` +
+        `⏱️ Duration: ${details.duration}\n\n` +
+        "Please choose a format to download:\n" +
+        "`[1]` Video (720p MP4)\n" +
+        "`[2]` Audio (High Quality MP3)\n\n" +
+        "Reply to this message with *1* or *2*.";
+
+      const sentMsg = await reply(menu);
+      if (sentMsg?.key?.id) {
+        searchSessions.set(sentMsg.key.id, {
+          type: "choice",
+          senderJid,
+          key: sentMsg.key,
+          videoId: details.id,
+          title: details.title,
+        });
+        setTimeout(() => searchSessions.delete(sentMsg.key.id), 300 * 1000);
+      }
+      await react("✅");
+      return;
+    }
+
+    // Keyword search handling
+    await react("🔍");
+    try {
+      const videos = await searchYouTube(input, 6);
+      if (!videos.length) {
+        await reply(`❌ No results found for: _${input}_`);
+        return;
+      }
+
+      let text = `🔎 Results for *"${input}"* on YouTube:\n\n`;
+      videos.forEach((video, index) => {
+        text += `\`[${index + 1}]\` ${video.title} — ${video.channel} (${video.duration})\n`;
+      });
+      text += `\n🎧 Reply with *1–${videos.length}* to select the video.`;
+
+      const sentMsg = await reply(text);
+      if (sentMsg?.key?.id) {
+        searchSessions.set(sentMsg.key.id, {
           type: "search",
-          senderJid: h,
-          key: r.key,
-          videos: n,
-        }),
-        setTimeout(() => searchSessions.delete(r.key.id), 300 * 1e3)),
-        await c("\u2705"));
-    } catch (n) {
-      (console.error("[YouTube] Search error:", n),
-        await o("\u274C Failed to search YouTube. Try again."));
+          senderJid,
+          key: sentMsg.key,
+          videos,
+        });
+        setTimeout(() => searchSessions.delete(sentMsg.key.id), 300 * 1000);
+      }
+      await react("✅");
+    } catch (err) {
+      console.error("[YouTube] Search error:", err);
+      await reply("❌ Failed to search YouTube. Please try again.");
     }
   },
-  onReply: async (
-    u,
-    m,
-    {
-      reply: o,
-      react: c,
-      senderText: p,
-      remoteJid: h,
-      quotedKey: a,
-      senderJid: n,
-    },
-  ) => {
-    if (!a?.id) return;
-    const t = searchSessions.get(a.id);
-    if (t && !(t.senderJid && n !== t.senderJid)) {
-      if (t.type === "search") {
-        const r = parseInt(p.trim());
-        if (isNaN(r) || r < 1 || r > t.videos.length) {
-          await o(
-            `\u26A0\uFE0F Please reply with a number between *1* and *${t.videos.length}*.`,
-          );
-          return;
-        }
-        const e = t.videos[r - 1];
-        await c("\u23F3");
-        try {
-          let w = "https://api.zenithapi.qzz.io/alldl";
-          const g = `https://www.youtube.com/watch?v=${e.id}`,
-            f = await fetchYouTubeMediaDetails(w, g);
-          if (f.error || !f.medias || !f.medias.length) {
-            await o(
-              `\u274C Failed to retrieve download options from API: ${f.message || "No media metadata returned"}`,
-            );
-            return;
-          }
-          if (t.key)
-            try {
-              await u.sendMessage(h, { delete: t.key });
-            } catch (d) {
-              console.error(
-                "[YouTube] Failed to delete search list message:",
-                d,
-              );
-            }
-          let i = `\u{1F3A5} *${f.title || e.title}*
-`;
-          (f.author &&
-            (i += `Channel: ${f.author}
-`),
-            (i += `Duration: ${e.duration}
 
-`),
-            (i += `Please choose a format to download:
-`),
-            (i += "`[1]` Video (Highest quality with audio)\n"),
-            (i += "`[2]` Audio (Best quality)\n\n"),
-            (i += "Reply to this message with *1* or *2* to download."));
-          const y = await o(i);
-          (y?.key?.id &&
-            (searchSessions.set(y.key.id, {
-              type: "choice",
-              senderJid: t.senderJid,
-              key: y.key,
-              videoId: e.id,
-              videoDetails: f,
-            }),
-            setTimeout(() => searchSessions.delete(y.key.id), 300 * 1e3)),
-            await c("\u2705"));
-        } catch (s) {
-          (console.error("[YouTube] Details fetch error:", s),
-            await o(
-              "\u274C Failed to fetch video download options. Please try again.",
-            ));
-        }
-      } else if (t.type === "choice") {
-        const r = p.trim(),
-          e = t.videoDetails;
-        if (r !== "1" && r !== "2") {
-          await o(
-            "\u26A0\uFE0F Invalid choice. Please reply with *1* for Video or *2* for Audio.",
-          );
-          return;
-        }
-        if ((await c("\u2B07\uFE0F"), t.key))
-          try {
-            await u.sendMessage(h, { delete: t.key });
-          } catch (s) {
-            console.error("[YouTube] Failed to delete choice message:", s);
-          }
+  onReply: async (sock, msg, { reply, react, senderText, remoteJid, quotedKey, senderJid }) => {
+    if (!quotedKey?.id) return;
+    const session = searchSessions.get(quotedKey.id);
+    if (!session) return;
+
+    if (session.senderJid && senderJid !== session.senderJid) {
+      return;
+    }
+
+    if (session.type === "search") {
+      const index = parseInt(senderText.trim(), 10);
+      if (isNaN(index) || index < 1 || index > session.videos.length) {
+        await reply(`⚠️ Please reply with a number between *1* and *${session.videos.length}*.`);
+        return;
+      }
+
+      const selected = session.videos[index - 1];
+
+      if (session.key) {
         try {
-          if (r === "1") {
-            const s = e.medias.filter(
-              (i) =>
-                i.type === "video" &&
-                (i.is_audio === !0 ||
-                  i.audioQuality ||
-                  i.mimeType?.includes("mp4a")),
-            );
-            s.sort((i, y) => (y.height || 0) - (i.height || 0));
-            const l = s[0] || e.medias.find((i) => i.type === "video");
-            if (!l || !l.url) {
-              await o("\u274C No video formats found for this track.");
-              return;
-            }
-            const w = l.clen ? parseInt(l.clen) : void 0,
-              g = await downloadMediaInChunks(l.url, w),
-              f = (e.title || "video").replace(/[\\/:*?"<>|]/g, "_");
-            (await u.sendMessage(
-              h,
-              {
-                video: g,
-                mimetype: "video/mp4",
-                fileName: `${f}.mp4`,
-                caption: `\u{1F3A5} *${e.title}*`,
-              },
-              { quoted: m },
-            ),
-              await c("\u2705"),
-              searchSessions.delete(a.id));
-          } else if (r === "2") {
-            const s = e.medias.filter(
-              (d) =>
-                (d.type === "video" || d.is_video === !0 || d.has_audio) &&
-                (d.hasAudio === !0 ||
-                  d.is_audio === !0 ||
-                  d.has_video === !0) &&
-                (d.extension === "mp4" || d.ext === "mp4"),
-            );
-            s.sort((d, v) => (d.height || 0) - (v.height || 0));
-            const l =
-              s[0] ||
-              e.medias.find((d) => d.extension === "mp4" || d.ext === "mp4");
-            if (!l || !l.url) {
-              await o("\u274C No suitable audio formats found for this track.");
-              return;
-            }
-            const w = l.clen ? parseInt(l.clen) : void 0,
-              g = await downloadMediaInChunks(l.url, w),
-              f = (e.title || "audio").replace(/[\\/:*?"<>|]/g, "_"),
-              i = l.extension || l.ext || "m4a",
-              y = i === "m4a" || i === "mp4" ? "audio/mp4" : "audio/mpeg";
-            (await u.sendMessage(
-              h,
-              { audio: g, mimetype: y, ptt: !1, fileName: `${f}.${i}` },
-              { quoted: m },
-            ),
-              await c("\u2705"),
-              searchSessions.delete(a.id));
-          }
-        } catch (s) {
-          (console.error("[YouTube] Download/send error:", s),
-            await o(
-              "\u274C Failed to download and send the file. Please try again.",
-            ));
+          await sock.sendMessage(remoteJid, { delete: session.key });
+        } catch {}
+      }
+
+      const menu =
+        `🎥 *${selected.title}*\n` +
+        `👤 Channel: ${selected.channel}\n` +
+        `⏱️ Duration: ${selected.duration}\n\n` +
+        "Please choose a format to download:\n" +
+        "`[1]` Video (720p MP4)\n" +
+        "`[2]` Audio (High Quality MP3)\n\n" +
+        "Reply to this message with *1* or *2*.";
+
+      const menuMsg = await reply(menu);
+      if (menuMsg?.key?.id) {
+        searchSessions.set(menuMsg.key.id, {
+          type: "choice",
+          senderJid: session.senderJid,
+          key: menuMsg.key,
+          videoId: selected.id,
+          title: selected.title,
+        });
+        setTimeout(() => searchSessions.delete(menuMsg.key.id), 300 * 1000);
+      }
+      searchSessions.delete(quotedKey.id);
+      await react("✅");
+    } else if (session.type === "choice") {
+      const choice = senderText.trim();
+      if (choice !== "1" && choice !== "2") {
+        await reply("⚠️ Invalid choice. Please reply with *1* for Video or *2* for Audio.");
+        return;
+      }
+
+      await react("⏳");
+
+      if (session.key) {
+        try {
+          await sock.sendMessage(remoteJid, { delete: session.key });
+        } catch {}
+      }
+
+      const safeTitle = (session.title || "youtube").replace(/[\\/:*?"<>|]/g, "_");
+
+      try {
+        if (choice === "1") {
+          const videoBuffer = await downloadVideo(session.videoId);
+
+          await sock.sendMessage(
+            remoteJid,
+            {
+              video: videoBuffer,
+              mimetype: "video/mp4",
+              fileName: `${safeTitle}.mp4`,
+              caption: `🎥 *${session.title}*`,
+            },
+            { quoted: msg }
+          );
+
+          await react("✅");
+          searchSessions.delete(quotedKey.id);
+        } else if (choice === "2") {
+          const audioBuffer = await downloadAudio(session.videoId);
+
+          await sock.sendMessage(
+            remoteJid,
+            {
+              audio: audioBuffer,
+              mimetype: "audio/mpeg",
+              ptt: false,
+              fileName: `${safeTitle}.mp3`,
+            },
+            { quoted: msg }
+          );
+
+          await react("✅");
+          searchSessions.delete(quotedKey.id);
         }
+      } catch (err) {
+        console.error("[YouTube/yt-dlp] Download error:", err);
+        const errMsg = err?.message?.includes("max-filesize")
+          ? "❌ File exceeds the maximum allowed size (70MB)."
+          : "❌ Failed to download the requested media with yt-dlp. Please try again.";
+        await reply(errMsg);
       }
     }
   },

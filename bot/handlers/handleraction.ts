@@ -20,9 +20,17 @@ export function createHandlerAction(sock, sentMessageIds) {
         if (!remoteJid) return;
         
         const participant = msg.key.participant || msg.participant || remoteJid;
-        const senderNumber = cleanNumber(participant);
+        let resolvedPn = global.resolvePhoneNumber ? global.resolvePhoneNumber(participant) : null;
+        if (!resolvedPn || resolvedPn === cleanNumber(participant)) {
+            if (global.resolvePhoneNumberAsync) {
+                try {
+                    resolvedPn = await global.resolvePhoneNumberAsync(participant);
+                } catch {}
+            }
+        }
+        const senderNumber = resolvedPn || cleanNumber(participant);
         
-        if (!global.isAdmin(participant)) {
+        if (!global.isAdmin(participant) && !global.isAdmin(senderNumber)) {
             const isNewsletter = remoteJid.endsWith("@newsletter");
             const isGroup = remoteJid.endsWith("@g.us");
             
@@ -85,11 +93,12 @@ export function createHandlerAction(sock, sentMessageIds) {
             const msgType = Object.keys(msg.message || {})[0] || "unknown";
             
             console.log(`  \x1B[90m${timestamp}\x1B[0m  \x1B[90m${global.lang.action.received(msgType, senderNumber)}\x1B[0m`);
-            console.log(`  \x1B[90m${JSON.stringify(msg, null, 2).split('\\n').join('\\n  ')}\x1B[0m`);
+            console.log(`  \x1B[90m${JSON.stringify(msg, null, 2).split('\n').join('\n  ')}\x1B[0m`);
             
             try {
-                if (global.db.messageModel) {
-                    global.db.messageModel.create({
+                const msgModel = global.db?.messageModel || (global as any).models?.messageModel;
+                if (msgModel) {
+                    msgModel.create({
                         messageID: msg.key.id,
                         senderID: senderNumber,
                         threadID: remoteJid,
@@ -105,9 +114,15 @@ export function createHandlerAction(sock, sentMessageIds) {
                             
         const hasQuotedMsg = !!contextInfo?.quotedMessage;
         const quotedMsg = contextInfo?.quotedMessage;
+        
+        const botIdClean = (sock.user?.id || "").split(":")[0].replace(/\D/g, "");
+        const botLidClean = (sock.user?.lid || "").split(":")[0].replace(/\D/g, "");
+        const participantClean = (contextInfo?.participant || "").split("@")[0].split(":")[0].replace(/\D/g, "");
+        const isFromMe = (!!participantClean && (participantClean === botIdClean || participantClean === botLidClean)) || contextInfo?.participant === sock.user?.id;
+
         const quotedKey = hasQuotedMsg ? {
             remoteJid: remoteJid,
-            fromMe: contextInfo.participant === sock.user?.id,
+            fromMe: isFromMe,
             id: contextInfo.stanzaId,
             participant: contextInfo.participant || remoteJid
         } : undefined;

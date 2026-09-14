@@ -1,2 +1,80 @@
 // @ts-nocheck
-"use strict";const u=global.fileURLToPath(import.meta.url),g=global.path.dirname(u);function y(){try{const n=global.path.resolve(g,"../config.json");if(global.fs.existsSync(n)){const t=JSON.parse(global.fs.readFileSync(n,"utf-8"));if(t&&typeof t.language=="string")return t.language.trim()}}catch(n){console.error("Error reading language config:",n)}return"en"}const s={};function d(){const n=y(),t=global.path.resolve(g,`${n}.lang`);if(global.fs.existsSync(t)){const e=global.fs.readFileSync(t,"utf-8").split(/\r?\n/);for(const o of e){const a=o.trim();if(!a||a.startsWith("#"))continue;const i=a.indexOf("=");if(i!==-1){const f=a.substring(0,i).trim(),c=a.substring(i+1).trim().replace(/\\n/g,'\n');s[f]=c}}}else console.warn(`Language file ${t} not found. Falling back to default keys.`)}d();export function getLang(n,...t){let r=s[n]||n;return t.forEach((e,o)=>{r=r.replace(`%${o+1}`,e)}),r}function l(n){const t=(...r)=>getLang(n,...r);return new Proxy(t,{get(r,e){if(typeof e=="string")return e==="toString"||e==="valueOf"?()=>getLang(n):l(`${n}.${e}`)}})}export const langProxy=new Proxy({},{get(n,t){if(typeof t=="string")return l(t)}});global.getLang=getLang,global.lang=langProxy;export{};
+"use strict";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function getLanguage() {
+    try {
+        const cfgPath = path.resolve(__dirname, "../config.json");
+        if (fs.existsSync(cfgPath)) {
+            const t = JSON.parse(fs.readFileSync(cfgPath, "utf-8"));
+            if (t && typeof t.language === "string") return t.language.trim();
+        }
+    } catch (n) {
+        console.error("Error reading language config:", n);
+    }
+    return "en";
+}
+
+const langMap: Record<string, string> = {};
+
+function loadLang() {
+    const lang = getLanguage();
+    const langFilePath = path.resolve(__dirname, `${lang}.lang`);
+    if (fs.existsSync(langFilePath)) {
+        const lines = fs.readFileSync(langFilePath, "utf-8").split(/\r?\n/);
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith("#")) continue;
+            const idx = trimmed.indexOf("=");
+            if (idx !== -1) {
+                const key = trimmed.substring(0, idx).trim();
+                const val = trimmed.substring(idx + 1).trim().replace(/\\n/g, '\n');
+                langMap[key] = val;
+            }
+        }
+    } else {
+        console.warn(`Language file ${langFilePath} not found. Falling back to default keys.`);
+    }
+}
+
+loadLang();
+
+export function getLang(key: string, ...args: any[]) {
+    const template = langMap[key] || key;
+    return template.replace(/%(\d+)/g, (match, digits) => {
+        const idx = parseInt(digits, 10) - 1;
+        return (idx >= 0 && idx < args.length && args[idx] !== undefined) ? String(args[idx]) : match;
+    });
+}
+
+function createProxy(key: string) {
+    const fn = (...args: any[]) => getLang(key, ...args);
+    return new Proxy(fn, {
+        get(target, prop) {
+            if (typeof prop === "string") {
+                if (prop === "toString" || prop === "valueOf") return () => getLang(key);
+                return createProxy(`${key}.${prop}`);
+            }
+            return (target as any)[prop];
+        }
+    });
+}
+
+export const langProxy = new Proxy({}, {
+    get(target, prop) {
+        if (typeof prop === "string") {
+            return createProxy(prop);
+        }
+        return (target as any)[prop];
+    }
+});
+
+(global as any).getLang = getLang;
+(global as any).lang = langProxy;
+
+export default { getLang, lang: langProxy };

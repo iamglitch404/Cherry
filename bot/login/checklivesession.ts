@@ -1,2 +1,39 @@
 // @ts-nocheck
-"use strict";export function checkLiveSession(e,t){if(e.creds&&e.creds.me&&e.creds.me.id&&t){const r=e.creds.me.id,c=global.getFormattedJid(t);if(c){const i=(r.split(":")[0]||"").replace(/\D/g,""),s=(c.split("@")[0]||"").replace(/\D/g,"");if(i&&s&&i!==s)return!1}}return!0}export function clearInvalidSession(e){try{global.fs.existsSync(e)&&(global.fs.rmSync(e,{recursive:!0,force:!0}),console.log(`[System] Cleared invalid session folder: ${e}`))}catch(t){console.error("[System] Failed to clear session folder:",t);try{const r=global.path.join(e,"creds.json");global.fs.existsSync(r)&&global.fs.unlinkSync(r)}catch{}}}
+"use strict";
+
+import fs from "fs";
+import path from "path";
+
+export function checkLiveSession(authState, targetPhoneNumber) {
+  if (authState?.creds?.me?.id && targetPhoneNumber) {
+    const activeId = authState.creds.me.id;
+    const formattedJid = global.getFormattedJid ? global.getFormattedJid(targetPhoneNumber) : null;
+
+    if (formattedJid) {
+      const activeDigits = (activeId.split(":")[0] || "").replace(/\D/g, "");
+      const targetDigits = (formattedJid.split("@")[0] || "").replace(/\D/g, "");
+
+      if (activeDigits && targetDigits && activeDigits !== targetDigits) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+export function clearInvalidSession(sessionFolder) {
+  try {
+    if (fs.existsSync(sessionFolder)) {
+      fs.rmSync(sessionFolder, { recursive: true, force: true });
+      console.log(`[System] Cleared invalid session folder: ${sessionFolder}`);
+    }
+  } catch (err) {
+    console.error("[System] Failed to clear session folder:", err);
+    try {
+      const credsPath = path.join(sessionFolder, "creds.json");
+      if (fs.existsSync(credsPath)) {
+        fs.unlinkSync(credsPath);
+      }
+    } catch {}
+  }
+}

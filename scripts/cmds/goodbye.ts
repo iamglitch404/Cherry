@@ -1,78 +1,111 @@
 // @ts-nocheck
 "use strict";
-export default {
-  config: {
-    name: "goodbye",
-    author: "Yugant Xettri",
-    aliases: ["setgoodbye", "leave", "setleave", "goodbyeset"],
-    prefix: !0,
-    role: 2,
-    description: { en: "Configure the goodbye/leave message for this group" },
-    category: "group",
-    guide: { en: "   {pn} [on | off | set <msg> | reset]" },
-  },
-  onStart: async function (u, l, i) {
-    const { args: g, remoteJid: e, reply: o, react: s } = i,
-      t = global.__goodbyeState || {},
-      n = global.__goodbyeMsg || {},
-      a = g[0]?.toLowerCase();
-    if (a === "on") {
-      ((t[e] = !0),
-        await s("\u2705"),
-        await o(`\u2705 *Goodbye messages are now ON* for this group.
 
-When a member leaves, the group will be notified.
-
-\u{1F4A1} Tip: Set a custom message with:
-\`!goodbye set Your message here\`
-Use *@user* to mention the member and *@group* for the group name.`));
+commandintro({
+  name: "goodbye",
+  author: "Yugant Xettri",
+  aliases: ["setgoodbye", "leave", "setleave", "goodbyeset"],
+  role: 1,
+  onStart: async (sock, msg, { args, remoteJid, reply, react, senderJid }) => {
+    if (!remoteJid.endsWith("@g.us")) {
+      await reply("❌ This command can only be used inside a group.");
       return;
     }
-    if (a === "off") {
-      ((t[e] = !1),
-        await s("\u{1F6AB}"),
-        await o("\u{1F6AB} *Goodbye messages are now OFF* for this group."));
-      return;
-    }
-    if (a === "set") {
-      const r = g.slice(1).join(" ").trim();
-      if (!r) {
-        await o(`\u274C Please provide a message.
 
-Example: \`!goodbye set We'll miss you @user! \u{1F499}\`
+    if (!global.isAdmin(senderJid)) {
+      try {
+        const metadata = await sock.groupMetadata(remoteJid);
+        const resolvedSender = global.resolvePhoneNumber ? global.resolvePhoneNumber(senderJid) : null;
+        const senderClean = senderJid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
 
-Placeholders:
-\u2022 *@user* \u2192 mentions the leaving member
-\u2022 *@group* \u2192 group name`);
+        const participant = metadata.participants.find((p) => {
+          const userJid = typeof p === "string" ? p : p.id;
+          const userClean = userJid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+          const pnClean = p?.phoneNumber?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+
+          return (
+            userJid === senderJid ||
+            userClean === senderClean ||
+            (resolvedSender && (userClean === resolvedSender || pnClean === resolvedSender))
+          );
+        });
+
+        if (!participant?.admin) {
+          await reply("❌ Only group admins can use this command.");
+          return;
+        }
+      } catch {
+        await reply("❌ Could not verify your admin status in this group.");
         return;
       }
-      ((n[e] = r),
-        await s("\u270D\uFE0F"),
-        await o(`\u2705 *Custom goodbye message saved!*
+    }
 
-Preview:
-${r}`));
+    global.__goodbyeState = global.__goodbyeState || {};
+    global.__goodbyeMsg = global.__goodbyeMsg || {};
+
+    const goodbyeStates = global.__goodbyeState;
+    const goodbyeMessages = global.__goodbyeMsg;
+    const action = args[0]?.toLowerCase();
+
+    if (action === "on") {
+      goodbyeStates[remoteJid] = true;
+      await react("✅");
+      await reply(
+        `✅ *Goodbye messages are now ON* for this group.\n\n` +
+        `When a member leaves, the group will be notified.\n\n` +
+        `💡 Tip: Set a custom message with:\n` +
+        `-goodbye set Your message here\n\n` +
+        `Use *@user* to mention the member and *@group* for the group name.`
+      );
       return;
     }
-    if (a === "reset") {
-      (delete n[e],
-        await s("\u{1F504}"),
-        await o("\u{1F504} *Goodbye message reset* to default."));
+
+    if (action === "off") {
+      goodbyeStates[remoteJid] = false;
+      await react("🚫");
+      await reply("🚫 *Goodbye messages are now OFF* for this group.");
       return;
     }
-    const d = t[e] !== void 0 ? t[e] : !1,
-      m = n[e] || "_(default \u2014 farewell text with member mention)_";
-    await o(`\u{1F4CB} *Goodbye / Leave Command Settings*
 
-Status: ${d ? "\u2705 ON" : "\u{1F6AB} OFF"}
-Message: ${m}
+    if (action === "set") {
+      const customMessage = args.slice(1).join(" ").trim();
+      if (!customMessage) {
+        await reply(
+          `❌ Please provide a message.\n\n` +
+          `Example: \`-goodbye set We'll miss you @user! 💙\`\n\n` +
+          `Placeholders:\n` +
+          `• *@user* → mentions the leaving member\n` +
+          `• *@group* → group name`
+        );
+        return;
+      }
 
-*Usage:*
-\u2022 \`!goodbye on\` \u2014 enable goodbye
-\u2022 \`!goodbye off\` \u2014 disable goodbye
-\u2022 \`!goodbye set <msg>\` \u2014 set custom message
-\u2022 \`!goodbye reset\` \u2014 restore default message
+      goodbyeMessages[remoteJid] = customMessage;
+      await react("✍️");
+      await reply(`✅ *Custom goodbye message saved!*\n\nPreview:\n${customMessage}`);
+      return;
+    }
 
-_Aliases: \`leave\`, \`setleave\`, \`setgoodbye\`_`);
+    if (action === "reset") {
+      delete goodbyeMessages[remoteJid];
+      await react("🔄");
+      await reply("🔄 *Goodbye message reset* to default.");
+      return;
+    }
+
+    const isEnabled = goodbyeStates[remoteJid] !== undefined ? goodbyeStates[remoteJid] : false;
+    const currentMessage = goodbyeMessages[remoteJid] || "_(default — farewell text with member mention)_";
+
+    await reply(
+      `📋 *Goodbye / Leave Command Settings*\n\n` +
+      `Status: ${isEnabled ? "✅ ON" : "🚫 OFF"}\n` +
+      `Message: ${currentMessage}\n\n` +
+      `*Usage:*\n` +
+      `• \`-goodbye on\` — enable goodbye\n` +
+      `• \`-goodbye off\` — disable goodbye\n` +
+      `• \`-goodbye set <msg>\` — set custom message\n` +
+      `• \`-goodbye reset\` — restore default message\n\n` +
+      `_Aliases: leave, setleave, setgoodbye_`
+    );
   },
-};
+});

@@ -1,92 +1,110 @@
 // @ts-nocheck
 "use strict";
-createCommand({
+
+commandintro({
   name: "welcome",
   author: "Yugant Xettri",
   aliases: ["setwelcome", "welcomeset"],
-  prefix: !0,
-  onStart: async (
-    w,
-    d,
-    { args: c, remoteJid: e, reply: t, react: s, senderJid: i },
-  ) => {
-    if (!e.endsWith("@g.us")) {
-      await t("\u274C This command can only be used inside a group.");
+  role: 1,
+  onStart: async (sock, msg, { args, remoteJid, reply, react, senderJid }) => {
+    if (!remoteJid.endsWith("@g.us")) {
+      await reply("❌ This command can only be used inside a group.");
       return;
     }
-    if (!global.isAdmin(i))
+
+    if (!global.isAdmin(senderJid)) {
       try {
-        const l = (await w.groupMetadata(e)).participants.find((m) => {
-          const u = typeof m == "string" ? m : m.id;
-          return u === i || u?.split(":")[0] + "@s.whatsapp.net" === i;
+        const metadata = await sock.groupMetadata(remoteJid);
+        const resolvedSender = global.resolvePhoneNumber ? global.resolvePhoneNumber(senderJid) : null;
+        const senderClean = senderJid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+
+        const participant = metadata.participants.find((p) => {
+          const userJid = typeof p === "string" ? p : p.id;
+          const userClean = userJid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+          const pnClean = p?.phoneNumber?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+
+          return (
+            userJid === senderJid ||
+            userClean === senderClean ||
+            (resolvedSender && (userClean === resolvedSender || pnClean === resolvedSender))
+          );
         });
-        if (!(typeof l == "object" ? l?.admin : null)) {
-          await t("\u274C Only group admins can use this command.");
+
+        if (!participant?.admin) {
+          await reply("❌ Only group admins can use this command.");
           return;
         }
       } catch {
-        await t("\u274C Could not verify your admin status.");
+        await reply("❌ Could not verify your admin status in this group.");
         return;
       }
-    const a = global.__welcomeState || {},
-      r = global.__welcomeMsg || {},
-      n = c[0]?.toLowerCase();
-    if (n === "on") {
-      ((a[e] = !0),
-        await s("\u2705"),
-        await t(`\u2705 *Welcome messages are now ON* for this group.
+    }
 
-New members will receive a welcome card with their profile picture.
+    global.__welcomeState = global.__welcomeState || {};
+    global.__welcomeMsg = global.__welcomeMsg || {};
 
-\u{1F4A1} Tip: Set a custom message with:
-\`-welcome set Your message here\`
-Use *@user* to mention the new member and *@group* for the group name.`));
+    const welcomeStates = global.__welcomeState;
+    const welcomeMessages = global.__welcomeMsg;
+    const action = args[0]?.toLowerCase();
+
+    if (action === "on") {
+      welcomeStates[remoteJid] = true;
+      await react("✅");
+      await reply(
+        `✅ *Welcome messages are now ON* for this group.\n\n` +
+        `New members will receive a welcome card with their greeting.\n\n` +
+        `💡 Tip: Customize the welcome message with:\n` +
+        `-welcome set Your message here\n\n` +
+        `Use *@user* to mention the new member and *@group* for the group name.`
+      );
       return;
     }
-    if (n === "off") {
-      ((a[e] = !1),
-        await s("\u{1F6AB}"),
-        await t("\u{1F6AB} *Welcome messages are now OFF* for this group."));
+
+    if (action === "off") {
+      welcomeStates[remoteJid] = false;
+      await react("🚫");
+      await reply("🚫 *Welcome messages are now OFF* for this group.");
       return;
     }
-    if (n === "set") {
-      const o = c.slice(1).join(" ").trim();
-      if (!o) {
-        await t(`\u274C Please provide a message.
 
-Example: \`-welcome set Hello @user, welcome to @group! \u{1F389}\`
-
-Placeholders:
-\u2022 *@user* \u2192 mentions the new member
-\u2022 *@group* \u2192 group name`);
+    if (action === "set") {
+      const customMessage = args.slice(1).join(" ").trim();
+      if (!customMessage) {
+        await reply(
+          `❌ Please provide a message.\n\n` +
+          `Example: \`-welcome set Hello @user, welcome to @group! 🎉\`\n\n` +
+          `Placeholders:\n` +
+          `• *@user* → mentions the new member\n` +
+          `• *@group* → group name`
+        );
         return;
       }
-      ((r[e] = o),
-        await s("\u270D\uFE0F"),
-        await t(`\u2705 *Custom welcome message saved!*
 
-Preview:
-${o}`));
+      welcomeMessages[remoteJid] = customMessage;
+      await react("✍️");
+      await reply(`✅ *Custom welcome message saved!*\n\nPreview:\n${customMessage}`);
       return;
     }
-    if (n === "reset") {
-      (delete r[e],
-        await s("\u{1F504}"),
-        await t("\u{1F504} *Welcome message reset* to default."));
+
+    if (action === "reset") {
+      delete welcomeMessages[remoteJid];
+      await react("🔄");
+      await reply("🔄 *Welcome message reset* to default.");
       return;
     }
-    const g = a[e] !== void 0 ? a[e] : !0,
-      f =
-        r[e] || "_(default \u2014 shows member's profile picture + greeting)_";
-    await t(`\u{1F4CB} *Welcome Command Settings*
 
-Status: ${g ? "\u2705 ON" : "\u{1F6AB} OFF"}
-Message: ${f}
+    const isEnabled = welcomeStates[remoteJid] !== undefined ? welcomeStates[remoteJid] : true;
+    const currentMessage = welcomeMessages[remoteJid] || "_(default — shows member's profile picture + greeting)_";
 
-*Usage:*
-\u2022 \`-welcome on\` \u2014 enable welcome
-\u2022 \`-welcome off\` \u2014 disable welcome
-\u2022 \`-welcome set <msg>\` \u2014 set custom message
-\u2022 \`-welcome reset\` \u2014 restore default message`);
+    await reply(
+      `📋 *Welcome Command Settings*\n\n` +
+      `Status: ${isEnabled ? "✅ ON" : "🚫 OFF"}\n` +
+      `Message: ${currentMessage}\n\n` +
+      `*Usage:*\n` +
+      `• \`-welcome on\` — enable welcome\n` +
+      `• \`-welcome off\` — disable welcome\n` +
+      `• \`-welcome set <msg>\` — set custom message\n` +
+      `• \`-welcome reset\` — restore default message`
+    );
   },
 });

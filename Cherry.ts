@@ -153,6 +153,9 @@ const watchAndReloadConfig = (dir: string, type: string, prop: string, logName: 
 						return;
 					}
 					(global as any).Cherry[prop] = JSON.parse(fs.readFileSync(dir, 'utf-8'));
+					if (typeof (global as any).invalidateBotConfig === 'function') {
+						(global as any).invalidateBotConfig();
+					}
 					if (log.success) log.success(logName, `Reloaded ${dir.replace(process.cwd(), "")}`);
 				}
 				catch (err) {
@@ -292,17 +295,17 @@ if (config.autoRestart) {
 	const originalError = console.error;
 	console.info = (...args: any[]) => {
 		const msg = args.join(' ');
-		if (msg.includes('session') || msg.includes('Session')) return;
+		if (msg.includes('Closing session:') || msg.includes('Removing old closed session:')) return;
 		originalInfo(...args);
 	};
 	console.warn = (...args: any[]) => {
 		const msg = args.join(' ');
-		if (msg.includes('Session') || msg.includes('session') || msg.includes('bucket') || msg.includes('Decrypted message')) return;
+		if (msg.includes('Closing session:') || msg.includes('Removing old closed session:') || msg.includes('Decrypted message with old')) return;
 		originalWarn(...args);
 	};
 	console.error = (...args: any[]) => {
 		const msg = args.join(' ');
-		if (msg.includes('Failed to decrypt') || msg.includes('Session error') || msg.includes('V1 session')) return;
+		if (msg.includes('Failed to decrypt') || msg.includes('V1 session')) return;
 		originalError(...args);
 	};
 
@@ -310,7 +313,7 @@ if (config.autoRestart) {
 	const pino = (await import('pino')).default;
 	const qrcode = (await import('qrcode-terminal')).default;
 	const { Boom } = await import('@hapi/boom');
-	const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, Browsers, fetchLatestBaileysVersion } = await import('@whiskeysockets/baileys');
+	const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, Browsers, fetchLatestBaileysVersion, fetchLatestWaWebVersion } = await import('@whiskeysockets/baileys');
 
 	(global as any).fs = fs;
 	(global as any).path = pathModule;
@@ -324,6 +327,7 @@ if (config.autoRestart) {
 	(global as any).useMultiFileAuthState = useMultiFileAuthState;
 	(global as any).Browsers = Browsers;
 	(global as any).fetchLatestBaileysVersion = fetchLatestBaileysVersion;
+	(global as any).fetchLatestWaWebVersion = fetchLatestWaWebVersion;
 
 	const commands = new Map<string, any>();
 	const aliases = new Map<string, string>();
@@ -332,7 +336,18 @@ if (config.autoRestart) {
 	(global as any).aliases = aliases;
 	(global as any).commandCooldowns = commandCooldowns;
 
+	(global as any).__welcomeState = (global as any).__welcomeState || {};
+	(global as any).__welcomeMsg = (global as any).__welcomeMsg || {};
+	(global as any).__goodbyeState = (global as any).__goodbyeState || {};
+	(global as any).__goodbyeMsg = (global as any).__goodbyeMsg || {};
+
+	let cachedBotConfig: any = null;
+	(global as any).invalidateBotConfig = () => {
+		cachedBotConfig = null;
+	};
+
 	function getBotConfig() {
+		if (cachedBotConfig) return cachedBotConfig;
 		const defaultConfig: any = {
 			number: null,
 			printQR: true,
@@ -392,6 +407,7 @@ if (config.autoRestart) {
 		} catch (error) {
 			console.error((global as any).lang.config.readError(String(error)));
 		}
+		cachedBotConfig = defaultConfig;
 		return defaultConfig;
 	}
 
@@ -441,35 +457,125 @@ if (config.autoRestart) {
 		(global as any).finishBootSequence();
 	}
 
+	(global as any).lidToPnCache = (global as any).lidToPnCache || new Map<string, string>();
+
 	function getCleanedNumber(number: string): string {
+		if (!number) return '';
 		const part1 = number.split('@')[0];
 		const part2 = part1 ? part1.split(':')[0] : undefined;
 		return part2 ? part2.replace(/\D/g, '') : '';
 	}
-	function isAdmin(number: string): boolean {
-		const cleaned = getCleanedNumber(number);
-		const config = getBotConfig();
-		return config.adminBot.includes(cleaned);
+
+	function resolvePhoneNumber(jidOrLid: string): string {
+		if (!jidOrLid) return '';
+		const clean = getCleanedNumber(jidOrLid);
+		if (!clean) return '';
+
+		// 1. Check in-memory global cache
+		if ((global as any).lidToPnCache?.has(clean)) {
+			return (global as any).lidToPnCache.get(clean)!;
+		}
+
+		// 2. Check Baileys internal signalRepository mapping cache
+		try {
+			const signalRepo = (global as any).sock?.signalRepository;
+			const cached = signalRepo?.lidMapping?.mappingCache?.get(`lid:${clean}`);
+			if (cached && typeof cached === 'string') {
+				const pn = cached.replace(/\D/g, '');
+				if (pn) {
+					(global as any).lidToPnCache?.set(clean, pn);
+					return pn;
+				}
+			}
+		} catch { }
+
+		// 3. Check session reverse mapping files on disk
+		try {
+			const config = getBotConfig();
+			const sessionFolder = pathModule.resolve(config.sessionFolder || 'session');
+			const reverseFile = pathModule.join(sessionFolder, `lid-mapping-${clean}_reverse.json`);
+			if (fs.existsSync(reverseFile)) {
+				const raw = fs.readFileSync(reverseFile, 'utf-8');
+				const parsed = JSON.parse(raw);
+				if (typeof parsed === 'string' && parsed.length > 0) {
+					const pn = parsed.replace(/\D/g, '');
+					if (pn) {
+						(global as any).lidToPnCache?.set(clean, pn);
+						return pn;
+					}
+				}
+			}
+		} catch { }
+
+		return clean;
 	}
+
+	async function resolvePhoneNumberAsync(jidOrLid: string): Promise<string> {
+		const syncResult = resolvePhoneNumber(jidOrLid);
+		const clean = getCleanedNumber(jidOrLid);
+		if (syncResult && syncResult !== clean) return syncResult;
+
+		try {
+			const signalRepo = (global as any).sock?.signalRepository;
+			if (signalRepo?.lidMapping?.getPNForLID) {
+				const fullLid = jidOrLid.includes('@lid') ? jidOrLid : `${clean}@lid`;
+				const pn = await signalRepo.lidMapping.getPNForLID(fullLid);
+				if (pn) {
+					const cleanPn = String(pn).split('@')[0].split(':')[0].replace(/\D/g, '');
+					if (cleanPn) {
+						(global as any).lidToPnCache?.set(clean, cleanPn);
+						return cleanPn;
+					}
+				}
+			}
+		} catch { }
+
+		return syncResult || clean;
+	}
+
+	function isAdmin(number: string): boolean {
+		if (!number) return false;
+		const config = getBotConfig();
+		const adminList = (config.adminBot || []).map((a: any) => String(a).replace(/\D/g, ''));
+
+		const cleaned = getCleanedNumber(number);
+		if (cleaned && adminList.includes(cleaned)) return true;
+
+		const resolved = resolvePhoneNumber(number);
+		if (resolved && adminList.includes(resolved)) return true;
+
+		const botId = ((global as any).sock?.user?.id || '').split(':')[0].replace(/\D/g, '');
+		const botLid = ((global as any).sock?.user?.lid || '').split(':')[0].replace(/\D/g, '');
+		if (cleaned && (cleaned === botId || cleaned === botLid)) return true;
+		if (resolved && (resolved === botId || resolved === botLid)) return true;
+
+		return false;
+	}
+
 	function isWhitelistedGroup(groupId: string): boolean {
 		const config = getBotConfig();
 		if (!config.whiteListGroup.enable) return true;
 		return config.whiteListGroup.whiteListThreadIds.includes(groupId.trim());
 	}
+
 	function isWhitelistedUser(number: string): boolean {
-		const cleaned = getCleanedNumber(number);
+		if (!number) return false;
 		const config = getBotConfig();
 		if (!config.whiteListMode.enable) return true;
-		return config.whiteListMode.whiteListIds.includes(cleaned);
+		const cleaned = getCleanedNumber(number);
+		const resolved = resolvePhoneNumber(number);
+		const whiteList = (config.whiteListMode.whiteListIds || []).map((a: any) => String(a).replace(/\D/g, ''));
+		return whiteList.includes(cleaned) || (!!resolved && whiteList.includes(resolved));
 	}
 
 	(global as any).getBotConfig = getBotConfig;
 	(global as any).getFormattedJid = getFormattedJid;
+	(global as any).resolvePhoneNumber = resolvePhoneNumber;
+	(global as any).resolvePhoneNumberAsync = resolvePhoneNumberAsync;
 	(global as any).isAdmin = isAdmin;
 	(global as any).isWhitelistedGroup = isWhitelistedGroup;
 	(global as any).isWhitelistedUser = isWhitelistedUser;
 	(global as any).connectToWhatsApp = connectToWhatsApp;
-	(global as any).handleReconnect = handleReconnect;
 	(global as any).renderPairingCodeBox = renderPairingCodeBox;
 
 	const { printBootLogo } = await import('./bot/login/login.ts');

@@ -1,2 +1,26 @@
 // @ts-nocheck
-"use strict";import{spawn as i}from"child_process";import o from"./logger/log.ts";import e from"path";import{fileURLToPath as n}from"url";const s=n(import.meta.url),m=e.dirname(s);function t(){i("npx tsx Cherry.ts",{cwd:m,stdio:"inherit",shell:!0}).on("close",r=>{r===2&&(o.info?o.info("Restarting Project..."):console.log("Restarting Project..."),t())})}t();
+"use strict";
+import { spawn } from "child_process";
+import log from "./logger/log.ts";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function startBot() {
+    const child = spawn(process.execPath || "node", ["Cherry.ts"], {
+        cwd: __dirname,
+        stdio: "inherit"
+    });
+
+    child.on("close", (code) => {
+        if (code === 2) {
+            if (log.info) log.info("Restarting Project...");
+            else console.log("Restarting Project...");
+            startBot();
+        }
+    });
+}
+
+startBot();

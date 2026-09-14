@@ -1,2 +1,17 @@
 // @ts-nocheck
-"use strict";import{DataTypes as e}from"sequelize";export default function(t){return t.define("Global",{key:{type:e.STRING,primaryKey:!0},data:{type:e.JSON,defaultValue:{}}})}
+"use strict";
+
+import { DataTypes } from "sequelize";
+
+export default function defineGlobalModel(sequelize) {
+  return sequelize.define("Global", {
+    key: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    data: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  });
+}
