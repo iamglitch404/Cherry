@@ -84,9 +84,13 @@ async function convertImageToSticker(imageBuffer) {
   return await sharp(imageBuffer)
     .resize(512, 512, {
       fit: "contain",
+      kernel: sharp.kernel.lanczos3,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
-    .webp({ quality: 80 })
+    .sharpen({ sigma: 0.8, m1: 0.8, m2: 0.2 })
+    // lossless=true makes files too big for WhatsApp's sticker limit (~500KB)
+    // quality 95 is visually identical but stays small enough to render as a sticker
+    .webp({ quality: 95, smartSubsample: true, effort: 6 })
     .toBuffer();
 }
 
@@ -95,27 +99,52 @@ async function convertVideoToSticker(videoBuffer) {
   const inputPath = path.join(os.tmpdir(), `cherry_input_${timestamp}.mp4`);
   const outputPath = path.join(os.tmpdir(), `cherry_sticker_${timestamp}.webp`);
 
+  // WhatsApp silently shows animated stickers >~900KB as file downloads.
+  // Tier down quality until the output file is within limits.
+  const tiers = [
+    { fps: 15, quality: 80, compression: 4, duration: 6 },
+    { fps: 10, quality: 70, compression: 5, duration: 6 },
+    { fps: 8,  quality: 60, compression: 6, duration: 5 },
+  ];
+
+  const MAX_BYTES = 900 * 1024; // 900 KB hard cap
+
   try {
     await fs.promises.writeFile(inputPath, videoBuffer);
 
-    // Convert up to 7 seconds into an animated 512x512 WebP sticker
-    await execFileAsync("ffmpeg", [
-      "-y",
-      "-i", inputPath,
-      "-t", "7",
-      "-vcodec", "libwebp",
-      "-filter:v", "fps=15,scale=512:512:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000",
-      "-lossless", "0",
-      "-compression_level", "4",
-      "-q:v", "60",
-      "-loop", "0",
-      "-preset", "default",
-      "-an",
-      outputPath,
-    ]);
+    for (const tier of tiers) {
+      const scaleFilter = [
+        `fps=${tier.fps}`,
+        "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease",
+        "format=rgba",
+        "pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000",
+      ].join(",");
 
-    const webpBuffer = await fs.promises.readFile(outputPath);
-    return webpBuffer;
+      await execFileAsync("ffmpeg", [
+        "-y",
+        "-i", inputPath,
+        "-t", String(tier.duration),
+        "-vcodec", "libwebp",
+        "-filter:v", scaleFilter,
+        "-lossless", "0",
+        "-compression_level", String(tier.compression),
+        "-q:v", String(tier.quality),
+        "-loop", "0",
+        "-preset", "picture",
+        "-an",
+        outputPath,
+      ]);
+
+      const webpBuffer = await fs.promises.readFile(outputPath);
+
+      // Only return if within WhatsApp's sticker size limit
+      if (webpBuffer.length <= MAX_BYTES) {
+        return webpBuffer;
+      }
+    }
+
+    // Last resort: return whatever we have (best effort)
+    return await fs.promises.readFile(outputPath);
   } finally {
     await fs.promises.unlink(inputPath).catch(() => {});
     await fs.promises.unlink(outputPath).catch(() => {});
